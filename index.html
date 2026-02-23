@@ -585,7 +585,6 @@ function renderAll() {
         <iframe src="${embedSrc}" loading="lazy"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen></iframe>
-        <div class="live-label">● LIVE</div>
         <div class="stream-play-overlay">
           <div class="play-circle">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="black"><path d="M8 5v14l11-7z"/></svg>
@@ -606,8 +605,8 @@ function renderAll() {
     badge.dataset.id = ch.id;
     badge.innerHTML  = `
       <div class="ch-avatar">${init}</div>
-      <span class="ch-name">${esc(ch.name)}</span>
-      <span class="ch-online"></span>`;
+      <span class="ch-name">${esc(ch.name)}</span>`;
+
     badge.addEventListener('click', () => {
       activeChId = ch.id;
       document.querySelectorAll('.ch-badge').forEach(b =>
