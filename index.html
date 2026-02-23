@@ -567,9 +567,8 @@ const CHANNELS = [
 let liveChannels = [];
 let activeChId   = null;
 
-/* ── CEK LIVE VIA RSS + oEmbed ── */
+/* ── CEK LIVE ── */
 async function checkLiveStatus() {
-  // Show loading state in channel bar
   document.getElementById('channelScroll').innerHTML =
     '<span style="font-size:.72rem;color:var(--text3);white-space:nowrap;padding:0 8px;">⏳ Memeriksa siaran langsung…</span>';
 
@@ -577,60 +576,95 @@ async function checkLiveStatus() {
   liveChannels = results
     .map(r => r.status === 'fulfilled' ? r.value : null)
     .filter(ch => ch && ch.isLive);
-  // NO fallback — if none are live, show empty state
 }
 
 async function fetchChannelInfo(ch) {
-  try {
-    const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-    const abort = (ms) => { const c = new AbortController(); setTimeout(()=>c.abort(),ms); return c; };
+  const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  const mkAbort = (ms) => { const c = new AbortController(); setTimeout(() => c.abort(), ms); return c; };
 
-    // Step 1: Get latest video ID from RSS
+  // ── Metode 1: Cek /live page channel langsung ──
+  // Jika channel sedang live, YouTube redirect ke halaman video live
+  try {
+    const res = await fetch(proxy(`https://www.youtube.com/channel/${ch.id}/live`),
+      { signal: mkAbort(9000).signal });
+    if (res.ok) {
+      const text = await res.text();
+
+      // Kumpulkan semua sinyal live dari halaman
+      const signals = [
+        text.includes('"isLive":true'),
+        text.includes('"liveBroadcastDetails"'),
+        text.includes('"isLiveBroadcast":true'),
+        text.includes('"broadcastType":"LIVE"'),
+        text.includes('"status":"LIVE"'),
+        text.includes('"hlsManifestUrl"'),          // ada HLS = sedang streaming
+        text.includes('"dashManifestUrl"'),          // ada DASH = sedang streaming
+        text.includes('"playerType":"LIVE_STREAM_OFFLINE"') === false &&
+          text.includes('"videoDetails"') &&
+          text.includes('"isLiveContent":true') &&
+          text.includes('"isUpcoming":false') &&
+          (text.includes('"concurrentViewers"') || text.includes('"viewCount"')),
+      ];
+
+      // Sinyal negatif (pasti TIDAK live)
+      const offline =
+        text.includes('"LIVE_STREAM_OFFLINE"') ||
+        text.includes('"isUpcoming":true') ||
+        text.includes('"playerType":"LIVE_STREAM_OFFLINE"');
+
+      if (offline) return { ...ch, isLive: false, videoId: null };
+
+      const liveScore = signals.filter(Boolean).length;
+
+      if (liveScore >= 1) {
+        // Ambil videoId dari halaman ini
+        const vidMatch = text.match(/"videoId":"([a-zA-Z0-9_-]{11})"/);
+        const videoId = vidMatch ? vidMatch[1] : null;
+        return { ...ch, isLive: true, videoId };
+      }
+    }
+  } catch { /* lanjut ke metode 2 */ }
+
+  // ── Metode 2: Ambil RSS, cek video terbaru ──
+  try {
     const rssRes = await fetch(proxy(`https://www.youtube.com/feeds/videos.xml?channel_id=${ch.id}`),
-      { signal: abort(6000).signal });
-    if (!rssRes.ok) return { ...ch, isLive:false, videoId:null };
+      { signal: mkAbort(7000).signal });
+    if (!rssRes.ok) return { ...ch, isLive: false, videoId: null };
 
-    const xml   = new DOMParser().parseFromString(await rssRes.text(), 'text/xml');
-    const entry = xml.querySelector('entry');
-    if (!entry) return { ...ch, isLive:false, videoId:null };
+    const xml     = new DOMParser().parseFromString(await rssRes.text(), 'text/xml');
+    const entries = xml.querySelectorAll('entry');
+    if (!entries.length) return { ...ch, isLive: false, videoId: null };
 
-    const videoId = entry.querySelector('videoId')?.textContent || null;
-    if (!videoId) return { ...ch, isLive:false, videoId:null };
+    // Cek 2 video terbaru (live stream kadang bukan entry pertama)
+    for (const entry of Array.from(entries).slice(0, 2)) {
+      const videoId = entry.querySelector('videoId')?.textContent;
+      if (!videoId) continue;
 
-    // Step 2: Check if this specific video is currently a live stream
-    // using the YouTube page to detect "isLiveBroadcast" signal
-    const pageRes = await fetch(
-      proxy(`https://www.youtube.com/watch?v=${videoId}`),
-      { signal: abort(8000).signal });
-    if (!pageRes.ok) return { ...ch, isLive:false, videoId };
+      try {
+        const vRes = await fetch(proxy(`https://www.youtube.com/watch?v=${videoId}`),
+          { signal: mkAbort(8000).signal });
+        if (!vRes.ok) continue;
+        const vText = await vRes.text();
 
-    const pageText = await pageRes.text();
+        const offline =
+          vText.includes('"LIVE_STREAM_OFFLINE"') ||
+          vText.includes('"isUpcoming":true');
+        if (offline) continue;
 
-    // Check multiple signals for live status
-    const isLive = 
-      pageText.includes('"isLiveBroadcast":true') ||
-      pageText.includes('"liveBroadcastDetails"') ||
-      pageText.includes('"isLive":true') ||
-      (pageText.includes('"broadcastType":"LIVE"') && !pageText.includes('"broadcastType":"NONE"')) ||
-      pageText.includes('"status":"LIVE"');
+        const isLive =
+          vText.includes('"isLive":true') ||
+          vText.includes('"liveBroadcastDetails"') ||
+          vText.includes('"isLiveBroadcast":true') ||
+          vText.includes('"hlsManifestUrl"') ||
+          vText.includes('"dashManifestUrl"') ||
+          (vText.includes('"isLiveContent":true') && vText.includes('"concurrentViewers"'));
 
-    return { ...ch, isLive, videoId: isLive ? videoId : null };
-  } catch {
-    return { ...ch, isLive:false, videoId:null };
-  }
-}
+        if (isLive) return { ...ch, isLive: true, videoId };
+      } catch { continue; }
+    }
+  } catch { /* gagal semua */ }
 
-// Fallback check: use allorigins to proxy YouTube channel page
-async function checkChannelPageLive(ch) {
-  try {
-    const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-    const ctrl = new AbortController();
-    setTimeout(() => ctrl.abort(), 8000);
-    const res = await fetch(proxy(`https://www.youtube.com/channel/${ch.id}/live`), { signal: ctrl.signal });
-    if (!res.ok) return false;
-    const text = await res.text();
-    return text.includes('"isLive":true') || text.includes('"status":"LIVE"') || text.includes('"liveBroadcastDetails"');
-  } catch { return false; }
+  return { ...ch, isLive: false, videoId: null };
 }
 
 function embedUrl(ch, autoplay=1, mute=1) {
