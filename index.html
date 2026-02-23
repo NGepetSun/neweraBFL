@@ -376,33 +376,6 @@
     }
     .donate-close-btn:hover { background:var(--red-dark); }
 
-    /* ───── OFFLINE OVERLAY ───── */
-    .offline-overlay {
-      position: absolute; inset: 0; z-index: 3;
-      background: rgba(10,10,10,0.88);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 10px;
-      pointer-events: none;
-    }
-    .offline-overlay svg {
-      width: 42px; height: 42px;
-      color: var(--text3); opacity: .7;
-    }
-    .offline-overlay span {
-      font-size: .7rem; font-weight: 600;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--text3);
-    }
-    /* Live card — hover pointer actief */
-    .stream-card.is-live { cursor: pointer; }
-    .stream-card:not(.is-live) { cursor: default; }
-    .stream-card:not(.is-live):hover {
-      transform: none;
-      box-shadow: none;
-      border-color: var(--border);
-    }
-    .stream-card:not(.is-live) .stream-play-overlay { display: none; }
-
     /* ───── SCROLLBAR ───── */
     ::-webkit-scrollbar { width:4px; }
     ::-webkit-scrollbar-track { background:transparent; }
@@ -592,29 +565,8 @@ const CHANNELS = [
 ];
 
 let activeChId = null;
-let liveCount  = 0;
 
-/* ── EMBED URL ── */
-function embedUrl(ch) {
-  return `https://www.youtube.com/embed/live_stream?channel=${ch.id}&autoplay=0&mute=1&controls=1`;
-}
-
-/* ── CEK LIVE via oEmbed (CORS-safe, tanpa proxy) ── */
-async function checkLive(ch) {
-  try {
-    const ctrl = new AbortController();
-    setTimeout(() => ctrl.abort(), 7000);
-    const res = await fetch(
-      `https://www.youtube.com/oembed?url=https://www.youtube.com/channel/${ch.id}/live&format=json`,
-      { signal: ctrl.signal }
-    );
-    return res.ok; // 200 = live, 404 = tidak live
-  } catch {
-    return false; // timeout / error = anggap tidak live
-  }
-}
-
-/* ── RENDER SEMUA CHANNEL SEKALIGUS ── */
+/* ── RENDER SEMUA CHANNEL — TANPA CEK LIVE ── */
 function renderAll() {
   const grid   = document.getElementById('streamGrid');
   const scroll = document.getElementById('channelScroll');
@@ -622,30 +574,18 @@ function renderAll() {
   scroll.innerHTML = '';
 
   CHANNELS.forEach(ch => {
+    const embedSrc = `https://www.youtube.com/embed/live_stream?channel=${ch.id}&autoplay=0&mute=1&controls=1`;
+
     // ── CARD ──
     const card = document.createElement('div');
     card.className  = 'stream-card';
     card.dataset.id = ch.id;
     card.innerHTML  = `
       <div class="stream-thumb">
-        <iframe src="${embedUrl(ch)}" loading="lazy"
+        <iframe src="${embedSrc}" loading="lazy"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen></iframe>
-
-        <!-- Overlay OFFLINE (terlihat dulu, hilang jika live) -->
-        <div class="offline-overlay" id="off-${ch.id}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-            <rect x="2" y="4" width="20" height="15" rx="2.5"/>
-            <path d="M8 19l1.5-3M16 19l-1.5-3M5 22h14"/>
-            <line x1="2" y1="4" x2="22" y2="19" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          <span>Sedang Tidak Live</span>
-        </div>
-
-        <!-- Badge LIVE (tersembunyi dulu) -->
-        <div class="live-label" id="lbl-${ch.id}" style="display:none;">● LIVE</div>
-
-        <!-- Play overlay (hover) -->
+        <div class="live-label">● LIVE</div>
         <div class="stream-play-overlay">
           <div class="play-circle">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="black"><path d="M8 5v14l11-7z"/></svg>
@@ -654,20 +594,17 @@ function renderAll() {
       </div>
       <div class="stream-info">
         <div class="stream-name">${esc(ch.name)}</div>
-        <div class="stream-sub" id="sub-${ch.id}">Memeriksa…</div>
+        <div class="stream-sub">YouTube Live</div>
       </div>`;
-    card.addEventListener('click', () => {
-      if (card.classList.contains('is-live')) openModal(ch);
-    });
+    card.addEventListener('click', () => openModal(ch));
     grid.appendChild(card);
 
-    // ── BADGE di channel bar (disembunyikan, muncul kalau live) ──
+    // ── BADGE channel bar — semua tampil ──
+    const init  = ch.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
     const badge = document.createElement('div');
     badge.className  = 'ch-badge';
     badge.dataset.id = ch.id;
-    badge.style.display = 'none';
-    const init = ch.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
-    badge.innerHTML = `
+    badge.innerHTML  = `
       <div class="ch-avatar">${init}</div>
       <span class="ch-name">${esc(ch.name)}</span>
       <span class="ch-online"></span>`;
@@ -680,66 +617,15 @@ function renderAll() {
     scroll.appendChild(badge);
   });
 
-  // Teks sementara di counter
-  document.getElementById('liveCountBadge').textContent = 'Memeriksa…';
-  document.getElementById('navLiveCount').textContent   = '…';
+  // Counter = total channel
+  document.getElementById('liveCountBadge').textContent = `${CHANNELS.length} Channel`;
+  document.getElementById('navLiveCount').textContent   = CHANNELS.length;
+
+  // Hero = channel pertama
+  setHero(CHANNELS[0]);
 }
 
-/* ── TANDAI CHANNEL SEBAGAI LIVE / OFFLINE ── */
-function markLive(ch) {
-  const card = document.querySelector(`.stream-card[data-id="${ch.id}"]`);
-  if (!card) return;
-  card.classList.add('is-live');
-
-  // Sembunyikan overlay offline, tampilkan badge live
-  const off = document.getElementById(`off-${ch.id}`);
-  const lbl = document.getElementById(`lbl-${ch.id}`);
-  const sub = document.getElementById(`sub-${ch.id}`);
-  if (off) off.style.display = 'none';
-  if (lbl) lbl.style.display = 'block';
-  if (sub) { sub.textContent = 'YouTube Live'; sub.style.color = ''; }
-
-  // Tampilkan badge di channel bar
-  const badge = document.querySelector(`.ch-badge[data-id="${ch.id}"]`);
-  if (badge) badge.style.display = 'flex';
-
-  // Update hero jika ini yang pertama live
-  liveCount++;
-  if (liveCount === 1) setHero(ch);
-  updateCounters();
-}
-
-function markOffline(ch) {
-  const sub = document.getElementById(`sub-${ch.id}`);
-  if (sub) { sub.textContent = 'Tidak Live'; sub.style.color = 'var(--text3)'; }
-  updateCounters();
-}
-
-/* ── UPDATE COUNTER ── */
-function updateCounters() {
-  document.getElementById('liveCountBadge').textContent = `${liveCount} Live`;
-  document.getElementById('navLiveCount').textContent   = liveCount;
-
-  // Jika bar kosong, tampilkan pesan
-  const scroll = document.getElementById('channelScroll');
-  const hasVisible = [...scroll.querySelectorAll('.ch-badge')]
-    .some(b => b.style.display !== 'none');
-  if (!hasVisible) {
-    let msg = scroll.querySelector('.no-live-bar-msg');
-    if (!msg) {
-      msg = document.createElement('span');
-      msg.className = 'no-live-bar-msg';
-      msg.style.cssText = 'font-size:.72rem;color:var(--text3);padding:0 8px;white-space:nowrap;';
-      msg.textContent = 'Belum ada yang live saat ini';
-      scroll.appendChild(msg);
-    }
-  } else {
-    const msg = scroll.querySelector('.no-live-bar-msg');
-    if (msg) msg.remove();
-  }
-}
-
-/* ── SET HERO ── */
+/* ── HERO ── */
 function setHero(ch) {
   document.getElementById('heroWrap').innerHTML =
     `<iframe src="https://www.youtube.com/embed/live_stream?channel=${ch.id}&autoplay=1&mute=1&controls=1"
@@ -748,15 +634,6 @@ function setHero(ch) {
   document.getElementById('heroTitle').textContent = ch.name;
   document.getElementById('heroWatchBtn').onclick  = () => openModal(ch);
   document.getElementById('heroMoreBtn').onclick   = () => openModal(ch);
-}
-
-/* ── CEK SEMUA CHANNEL (PARALEL, UPDATE REALTIME) ── */
-async function checkAllChannels() {
-  await Promise.allSettled(
-    CHANNELS.map(ch =>
-      checkLive(ch).then(live => live ? markLive(ch) : markOffline(ch))
-    )
-  );
 }
 
 /* ── MODAL PLAYER ── */
@@ -792,7 +669,7 @@ document.getElementById('donateModal').addEventListener('click', e => {
 window.addEventListener('scroll', () =>
   document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40));
 
-/* ── ESC KEY ── */
+/* ── ESC ── */
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeModal(); closeDonate(); }
 });
@@ -803,16 +680,10 @@ function esc(str) {
 
 /* ── INIT ── */
 function init() {
-  // Loading hilang dalam 1.2 detik — tidak perlu tunggu cek live
   setTimeout(() =>
     document.getElementById('loadingScreen').classList.add('hidden'), 1200);
-
-  // Tampilkan semua channel langsung dengan overlay "Sedang Tidak Live"
   document.getElementById('mainContent').style.display = 'block';
   renderAll();
-
-  // Cek live di background, update UI per channel begitu hasil masuk
-  checkAllChannels();
 }
 
 document.addEventListener('DOMContentLoaded', init);
