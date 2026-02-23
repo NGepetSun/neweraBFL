@@ -124,25 +124,78 @@
     }
     .mw-close-btn:hover { background:rgba(255,255,255,.15); }
 
+    .mw-body { flex:1; display:flex; overflow:hidden; min-height:0; }
     .mw-grid {
       flex:1; display:grid; gap:3px; padding:3px;
       overflow:hidden; min-height:0;
     }
-    .mw-grid.layout-2h { grid-template-columns:1fr 1fr; grid-template-rows:1fr; }
-    .mw-grid.layout-2v { grid-template-columns:1fr; grid-template-rows:1fr 1fr; }
-    .mw-grid.layout-3l { grid-template-columns:2fr 1fr; grid-template-rows:1fr 1fr;
-      grid-template-areas: "main s1" "main s2"; }
-    .mw-grid.layout-3r { grid-template-columns:1fr 2fr; grid-template-rows:1fr 1fr;
-      grid-template-areas: "s1 main" "s2 main"; }
-    .mw-grid.layout-4 { grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; }
+    .mw-grid.layout-3 { grid-template-columns:repeat(3,1fr); grid-template-rows:1fr; }
+    .mw-grid.layout-4 { grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(2,1fr); }
+    .mw-grid.layout-6 { grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(2,1fr); }
+    .mw-grid.layout-9 { grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); }
+
+    /* ── LIVECHAT SIDEBAR ── */
+    .mw-chat-sidebar {
+      width:0; flex-shrink:0; background:#0d0d0d;
+      border-left:1px solid var(--border); display:flex;
+      flex-direction:column; overflow:hidden; transition:width .3s ease;
+    }
+    .mw-chat-sidebar.open { width:320px; }
+    .mw-chat-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 12px; border-bottom:1px solid var(--border);
+      flex-shrink:0;
+    }
+    .mw-chat-title {
+      font-size:.72rem; font-weight:700; letter-spacing:2px;
+      text-transform:uppercase; color:var(--text2);
+      display:flex; align-items:center; gap:7px;
+    }
+    .mw-chat-title svg { color:var(--red); }
+    .mw-chat-tabs {
+      display:flex; gap:4px; padding:8px 10px;
+      border-bottom:1px solid var(--border); flex-shrink:0;
+      overflow-x:auto; flex-wrap:nowrap;
+    }
+    .mw-chat-tab {
+      padding:4px 10px; border-radius:12px; font-size:.65rem;
+      font-weight:700; letter-spacing:1px; cursor:pointer;
+      border:1px solid var(--border); background:transparent;
+      color:var(--text3); white-space:nowrap; flex-shrink:0;
+      transition:all .2s;
+    }
+    .mw-chat-tab.active {
+      background:rgba(229,9,20,.15); border-color:rgba(229,9,20,.5);
+      color:var(--red);
+    }
+    .mw-chat-frame-wrap { flex:1; overflow:hidden; min-height:0; }
+    .mw-chat-frame-wrap iframe {
+      width:100%; height:100%; border:0;
+    }
+    .mw-chat-empty {
+      flex:1; display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      gap:10px; color:var(--text3); padding:20px; text-align:center;
+    }
+    .mw-chat-empty svg { opacity:.3; }
+    .mw-chat-empty p { font-size:.75rem; line-height:1.6; }
+
+    .btn-toggle-chat {
+      display:flex; align-items:center; gap:6px;
+      padding:5px 12px; background:rgba(255,255,255,.06);
+      border:1px solid var(--border); border-radius:4px;
+      color:var(--text2); font-size:.68rem; font-weight:600;
+      cursor:pointer; transition:all .2s; letter-spacing:1px;
+      text-transform:uppercase;
+    }
+    .btn-toggle-chat:hover { background:rgba(255,255,255,.12); color:var(--text); }
+    .btn-toggle-chat.active { background:rgba(229,9,20,.15); border-color:rgba(229,9,20,.5); color:var(--red); }
 
     .mw-slot {
       position:relative; background:#0a0a0a;
       border-radius:4px; overflow:hidden;
       display:flex; flex-direction:column;
     }
-    .mw-grid.layout-3l .mw-slot:first-child { grid-area:main; }
-    .mw-grid.layout-3r .mw-slot:first-child { grid-area:main; }
 
     .mw-slot iframe {
       width:100%; flex:1; border:0; min-height:0;
@@ -657,15 +710,39 @@
   <div class="mw-topbar">
     <div class="mw-logo">⊞ MULTIWATCH</div>
     <div class="mw-layout-btns">
-      <button class="mw-layout-btn active" onclick="setMwLayout('2h')" id="mwBtn2h">2 Horizontal</button>
-      <button class="mw-layout-btn" onclick="setMwLayout('2v')" id="mwBtn2v">2 Vertikal</button>
-      <button class="mw-layout-btn" onclick="setMwLayout('3l')" id="mwBtn3l">3 (Main Kiri)</button>
-      <button class="mw-layout-btn" onclick="setMwLayout('3r')" id="mwBtn3r">3 (Main Kanan)</button>
-      <button class="mw-layout-btn" onclick="setMwLayout('4')" id="mwBtn4">4 Grid</button>
+      <button class="mw-layout-btn active" onclick="setMwLayout('3')" id="mwBtn3">3</button>
+      <button class="mw-layout-btn" onclick="setMwLayout('4')" id="mwBtn4">4</button>
+      <button class="mw-layout-btn" onclick="setMwLayout('6')" id="mwBtn6">6</button>
+      <button class="mw-layout-btn" onclick="setMwLayout('9')" id="mwBtn9">9</button>
     </div>
-    <button class="mw-close-btn" onclick="closeMultiwatch()">✕ Tutup</button>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn-toggle-chat" id="btnToggleChat" onclick="toggleChat()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+        </svg>
+        Live Chat
+      </button>
+      <button class="mw-close-btn" onclick="closeMultiwatch()">✕ Tutup</button>
+    </div>
   </div>
-  <div class="mw-grid layout-2h" id="mwGrid"></div>
+  <div class="mw-body">
+    <div class="mw-grid layout-3" id="mwGrid"></div>
+    <div class="mw-chat-sidebar" id="mwChatSidebar">
+      <div class="mw-chat-header">
+        <div class="mw-chat-title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+          Live Chat
+        </div>
+      </div>
+      <div class="mw-chat-tabs" id="mwChatTabs"></div>
+      <div class="mw-chat-frame-wrap" id="mwChatFrameWrap">
+        <div class="mw-chat-empty" id="mwChatEmpty">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="var(--text3)"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+          <p>Pilih channel yang sedang live<br>untuk melihat chat-nya</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ── CHANNEL PICKER ── -->
@@ -838,18 +915,16 @@ function esc(str) {
 }
 
 /* ── MULTIWATCH ── */
-let mwLayout  = '2h';
-let mwSlotCount = 2;
-let mwSlots   = [];  // [{ch: null|channelObj}, ...]
+let mwLayout = '3';
+let mwSlots  = [];
 let mwPickerTargetSlot = -1;
+let mwChatOpen = false;
+let mwActiveChatSlot = -1;
 
-const MW_LAYOUTS = {
-  '2h': 2, '2v': 2, '3l': 3, '3r': 3, '4': 4
-};
+const MW_LAYOUTS = { '3': 3, '4': 4, '6': 6, '9': 9 };
 
 function openMultiwatch() {
-  const overlay = document.getElementById('multiwatchOverlay');
-  overlay.classList.add('open');
+  document.getElementById('multiwatchOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
   if (mwSlots.length === 0) initMwSlots();
   renderMwGrid();
@@ -857,27 +932,25 @@ function openMultiwatch() {
 function closeMultiwatch() {
   document.getElementById('multiwatchOverlay').classList.remove('open');
   document.body.style.overflow = '';
-  // stop all iframes
   document.querySelectorAll('#mwGrid iframe').forEach(f => f.src = '');
+  if (mwChatOpen) toggleChat(true);
 }
 function setMwLayout(layout) {
   mwLayout = layout;
   document.querySelectorAll('.mw-layout-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('mwBtn' + layout).classList.add('active');
   const count = MW_LAYOUTS[layout];
-  // Adjust slots
   while (mwSlots.length < count) mwSlots.push({ ch: null });
-  mwSlotCount = count;
   renderMwGrid();
+  renderChatTabs();
 }
 function initMwSlots() {
   mwSlots = [];
   const count = MW_LAYOUTS[mwLayout];
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < count; i++)
     mwSlots.push({ ch: i < CHANNELS.length ? CHANNELS[i] : null });
-  }
-  mwSlotCount = count;
 }
+
 function renderMwGrid() {
   const grid = document.getElementById('mwGrid');
   grid.className = 'mw-grid layout-' + mwLayout;
@@ -912,9 +985,58 @@ function renderMwGrid() {
     }
     grid.appendChild(div);
   }
+  renderChatTabs();
 }
 
-/* Picker */
+/* ── LIVE CHAT ── */
+function toggleChat(forceClose) {
+  mwChatOpen = forceClose ? false : !mwChatOpen;
+  const sidebar = document.getElementById('mwChatSidebar');
+  const btn     = document.getElementById('btnToggleChat');
+  sidebar.classList.toggle('open', mwChatOpen);
+  btn.classList.toggle('active', mwChatOpen);
+  if (mwChatOpen && mwActiveChatSlot < 0) {
+    // auto-select first filled slot
+    const first = mwSlots.findIndex(s => s && s.ch);
+    if (first >= 0) switchChatTab(first);
+  }
+}
+
+function renderChatTabs() {
+  const tabs = document.getElementById('mwChatTabs');
+  tabs.innerHTML = '';
+  const count = MW_LAYOUTS[mwLayout];
+  for (let i = 0; i < count; i++) {
+    const slot = mwSlots[i];
+    if (!slot || !slot.ch) continue;
+    const init = slot.ch.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const tab  = document.createElement('button');
+    tab.className = 'mw-chat-tab' + (i === mwActiveChatSlot ? ' active' : '');
+    tab.textContent = slot.ch.name.split(' ')[0];
+    tab.title = slot.ch.name;
+    tab.onclick = () => switchChatTab(i);
+    tabs.appendChild(tab);
+  }
+}
+
+function switchChatTab(slotIdx) {
+  mwActiveChatSlot = slotIdx;
+  renderChatTabs();
+  const slot = mwSlots[slotIdx];
+  const wrap = document.getElementById('mwChatFrameWrap');
+  const empty = document.getElementById('mwChatEmpty');
+  if (!slot || !slot.ch) {
+    wrap.innerHTML = '';
+    wrap.appendChild(empty);
+    empty.style.display = 'flex';
+    return;
+  }
+  // YouTube live chat embed: use channel live_stream with chat iframe
+  const chatSrc = `https://www.youtube.com/live_chat?channel=${slot.ch.id}&embed_domain=${location.hostname || 'localhost'}&dark_theme=1`;
+  wrap.innerHTML = `<iframe src="${chatSrc}" allow="accelerometer; autoplay; clipboard-write; encrypted-media" allowfullscreen></iframe>`;
+}
+
+/* ── PICKER ── */
 function openPicker(slotIdx) {
   mwPickerTargetSlot = slotIdx;
   document.getElementById('mwPickerSearch').value = '';
@@ -926,20 +1048,16 @@ function closePicker() {
   mwPickerTargetSlot = -1;
 }
 function filterPicker() {
-  const q = document.getElementById('mwPickerSearch').value.toLowerCase();
-  renderPickerList(q);
+  renderPickerList(document.getElementById('mwPickerSearch').value.toLowerCase());
 }
 function renderPickerList(query) {
   const list = document.getElementById('mwPickerList');
   list.innerHTML = '';
-  const filtered = CHANNELS.filter(ch => ch.name.toLowerCase().includes(query));
-  filtered.forEach(ch => {
+  CHANNELS.filter(ch => ch.name.toLowerCase().includes(query)).forEach(ch => {
     const init = ch.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
     const item = document.createElement('div');
     item.className = 'mw-picker-item';
-    item.innerHTML = `
-      <div class="mw-picker-avatar">${init}</div>
-      <span class="mw-picker-ch-name">${esc(ch.name)}</span>`;
+    item.innerHTML = `<div class="mw-picker-avatar">${init}</div><span class="mw-picker-ch-name">${esc(ch.name)}</span>`;
     item.onclick = () => selectChannelForSlot(ch);
     list.appendChild(item);
   });
@@ -948,6 +1066,8 @@ function selectChannelForSlot(ch) {
   if (mwPickerTargetSlot < 0) return;
   if (!mwSlots[mwPickerTargetSlot]) mwSlots[mwPickerTargetSlot] = {};
   mwSlots[mwPickerTargetSlot].ch = ch;
+  // if this slot was the active chat, refresh it
+  if (mwPickerTargetSlot === mwActiveChatSlot) switchChatTab(mwActiveChatSlot);
   closePicker();
   renderMwGrid();
 }
