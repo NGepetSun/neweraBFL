@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BFL TV — Live Streaming</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ═══ THEME VARIABLES ═══ */
+    :root {
+      --red: #ff0000;
+      --red-dark: #cc0000;
+      --red-glow: rgba(255,0,0,0.25);
+      --green: #00c853;
+      --gold: #ffd600;
+      --font: 'Roboto', sans-serif;
+      --font-display: 'Bebas Neue', sans-serif;
+      --navbar-h: 56px;
+      --transition: 0.2s ease;
+      --radius: 8px;
+      --radius-sm: 4px;
+    }
+
+    /* DARK THEME */
+    [data-theme="dark"] {
+      --bg: #0f0f0f;
+      --bg2: #181818;
+      --bg3: #212121;
+      --bg4: #272727;
+      --surface: #282828;
+      --border: rgba(255,255,255,0.1);
+      --border2: rgba(255,255,255,0.06);
+      --text: #f1f1f1;
+      --text2: #aaaaaa;
+      --text3: #717171;
+      --text4: #3f3f3f;
+      --chip-bg: rgba(255,255,255,0.1);
+      --chip-hover: rgba(255,255,255,0.18);
+      --shadow: rgba(0,0,0,0.5);
+      --overlay: rgba(0,0,0,0.9);
+    }
+
+    /* LIGHT THEME */
+    [data-theme="light"] {
+      --bg: #ffffff;
+      --bg2: #f9f9f9;
+      --bg3: #f2f2f2;
+      --bg4: #e5e5e5;
+      --surface: #f2f2f2;
+      --border: rgba(0,0,0,0.1);
+      --border2: rgba(0,0,0,0.06);
+      --text: #0f0f0f;
+      --text2: #606060;
+      --text3: #909090;
+      --text4: #d3d3d3;
+      --chip-bg: rgba(0,0,0,0.05);
+      --chip-hover: rgba(0,0,0,0.1);
+      --shadow: rgba(0,0,0,0.1);
+      --overlay: rgba(255,255,255,0.95);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+    /* ═══ LOADING SCREEN ═══ */
+    .loading-screen {
+      position: fixed; inset: 0; background: #000;
+      z-index: 9999; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 24px;
+      transition: opacity .5s ease, visibility .5s ease;
+    }
+    .loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loading-logo {
+      display: flex; align-items: center; gap: 4px;
+      font-family: var(--font-display); font-size: 3rem; letter-spacing: 4px;
+    }
+    .loading-logo .bfl { color: #fff; }
+    .loading-logo .tv { color: var(--red); }
+    .loading-logo .yt-icon {
+      width: 44px; height: 31px; background: var(--red); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; margin-right: 8px;
+    }
+    .loader-bar { width: 200px; height: 3px; background: #222; border-radius: 2px; overflow: hidden; }
+    .loader-fill { height: 100%; background: var(--red); animation: loadfill 1.8s ease-in-out forwards; }
+    @keyframes loadfill { from { width:0 } to { width:100% } }
+    .loading-sub { font-size: .72rem; letter-spacing: 3px; color: #555; text-transform: uppercase; }
+
+    /* ═══ NAVBAR ═══ */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+      height: var(--navbar-h);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border2);
+      gap: 8px;
+    }
+
+    .nav-left { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+    .nav-center { flex: 1; max-width: 600px; display: flex; align-items: center; gap: 8px; }
+    .nav-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+    /* Hamburger */
+    .btn-menu {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: none; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text); transition: background .15s;
+    }
+    .btn-menu:hover { background: var(--chip-bg); }
+
+    /* Logo */
+    .nav-logo {
+      display: flex; align-items: center; gap: 2px;
+      cursor: pointer; text-decoration: none; flex-shrink: 0;
+    }
+    .nav-logo .yt-mark {
+      width: 34px; height: 24px; background: var(--red);
+      border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    }
+    .nav-logo .yt-mark svg { width: 20px; fill: #fff; }
+    .nav-logo-text {
+      font-family: var(--font-display); font-size: 1.3rem; letter-spacing: 2px;
+      color: var(--text); margin-left: 4px; line-height: 1;
+    }
+    .nav-logo-text span { color: var(--red); }
+
+    /* Search bar */
+    .search-form {
+      flex: 1; display: flex; align-items: center;
+      max-width: 500px;
+    }
+    .search-input-wrap {
+      flex: 1; display: flex; align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 40px 0 0 40px;
+      background: var(--bg);
+      padding: 0 16px; height: 40px;
+      transition: border-color .15s;
+    }
+    .search-input-wrap:focus-within { border-color: #1c62b9; }
+    .search-input {
+      flex: 1; border: none; background: none;
+      color: var(--text); font-size: .9rem; outline: none;
+      font-family: var(--font);
+    }
+    .search-input::placeholder { color: var(--text3); }
+    .btn-search {
+      width: 64px; height: 40px;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-left: none; border-radius: 0 40px 40px 0;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--text2); transition: background .15s;
+    }
+    .btn-search:hover { background: var(--bg4); color: var(--text); }
+
+    /* Icon buttons */
+    .btn-icon {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: none; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text2); transition: background .15s; position: relative;
+    }
+    .btn-icon:hover { background: var(--chip-bg); color: var(--text); }
+    .btn-icon svg { width: 22px; height: 22px; }
+
+    /* Theme toggle */
+    .theme-toggle-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: none; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text2); transition: background .15s;
+    }
+    .theme-toggle-btn:hover { background: var(--chip-bg); color: var(--text); }
+
+    /* Live pill */
+    .live-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(255,0,0,.12); border: 1px solid rgba(255,0,0,.3);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: .72rem; font-weight: 700; letter-spacing: 1.5px; color: var(--red);
+      cursor: pointer; transition: background .15s;
+    }
+    .live-pill:hover { background: rgba(255,0,0,.2); }
+    .live-dot { width: 7px; height: 7px; background: var(--red); border-radius: 50%; flex-shrink: 0; animation: blink 1.4s infinite; }
+    @keyframes blink { 0%,100% { opacity:1; box-shadow:0 0 0 0 var(--red-glow); } 50% { opacity:.4; box-shadow:0 0 0 4px transparent; } }
+
+    /* Multiwatch button */
+    .btn-multiwatch {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 14px; background: var(--chip-bg);
+      border: 1px solid var(--border); border-radius: 20px;
+      color: var(--text2); font-size: .78rem; font-weight: 600;
+      cursor: pointer; transition: all .15s; white-space: nowrap;
+    }
+    .btn-multiwatch:hover { background: var(--chip-hover); color: var(--text); }
+    .btn-multiwatch svg { flex-shrink: 0; }
+
+    /* ═══ CHIP BAR placeholder - removed ═══ */
+
+    /* ═══ MAIN LAYOUT ═══ */
+    .page-body {
+      padding-top: var(--navbar-h);
+      min-height: 100vh;
+    }
+
+    /* ═══ HERO SECTION ═══ */
+    .hero {
+      position: relative; height: 65vh; min-height: 400px;
+      display: flex; align-items: flex-end;
+      overflow: hidden; margin-bottom: 32px;
+    }
+    .hero-video-bg {
+      position: absolute; inset: 0;
+    }
+    .hero-video-bg iframe {
+      width: 100%; height: calc(100% + 80px);
+      margin-top: -40px; border: 0; pointer-events: none;
+    }
+    .hero-gradient {
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        to top,
+        var(--bg) 0%,
+        rgba(0,0,0,0.7) 25%,
+        rgba(0,0,0,0.2) 60%,
+        transparent 100%
+      );
+    }
+    .hero-gradient::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        to right,
+        rgba(0,0,0,0.9) 0%,
+        rgba(0,0,0,0.4) 40%,
+        transparent 70%
+      );
+    }
+    [data-theme="light"] .hero-gradient {
+      background: linear-gradient(
+        to top,
+        var(--bg) 0%,
+        rgba(255,255,255,0.5) 30%,
+        transparent 70%
+      );
+    }
+    [data-theme="light"] .hero-gradient::after {
+      background: linear-gradient(
+        to right,
+        rgba(255,255,255,0.85) 0%,
+        rgba(255,255,255,0.3) 40%,
+        transparent 70%
+      );
+    }
+    .hero-content {
+      position: relative; z-index: 2;
+      padding: 0 40px 40px; max-width: 560px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: .7rem; font-weight: 700; letter-spacing: 2px;
+      color: var(--red); text-transform: uppercase; margin-bottom: 10px;
+    }
+    .hero-title {
+      font-family: var(--font-display); font-size: clamp(2.5rem, 5vw, 4.5rem);
+      line-height: 1; letter-spacing: 2px; color: #fff;
+      margin-bottom: 10px; text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+    }
+    [data-theme="light"] .hero-title { color: var(--text); text-shadow: none; }
+    .hero-sub { font-size: .88rem; color: rgba(255,255,255,0.75); margin-bottom: 20px; }
+    [data-theme="light"] .hero-sub { color: var(--text2); }
+    .hero-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-watch {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 24px; background: rgba(255,255,255,0.95);
+      color: #000; font-weight: 700; font-size: .92rem;
+      border: none; border-radius: var(--radius-sm); cursor: pointer;
+      transition: background .15s, transform .15s;
+    }
+    .btn-watch:hover { background: rgba(255,255,255,0.8); transform: scale(1.02); }
+    [data-theme="light"] .btn-watch { background: var(--text); color: var(--bg); }
+    .btn-more {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 20px; background: rgba(113,113,113,0.7);
+      color: #fff; font-weight: 600; font-size: .92rem;
+      border: none; border-radius: var(--radius-sm); cursor: pointer;
+      transition: background .15s; backdrop-filter: blur(4px);
+    }
+    .btn-more:hover { background: rgba(113,113,113,0.5); }
+
+    /* ═══ CONTENT SECTIONS ═══ */
+    .section { padding: 0 16px 40px; }
+
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: 1.1rem; font-weight: 700; color: var(--text);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-title .live-badge-sm {
+      background: var(--red); color: #fff; font-size: .62rem;
+      font-weight: 700; letter-spacing: 1px; padding: 2px 7px;
+      border-radius: 2px; text-transform: uppercase;
+    }
+    .section-count {
+      font-size: .82rem; color: var(--text3); font-weight: 500;
+    }
+
+    /* ═══ STREAM GRID (YouTube style) ═══ */
+    .stream-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px 14px;
+    }
+
+    .stream-card {
+      cursor: pointer; transition: transform .2s ease;
+    }
+    .stream-card:hover { transform: translateY(-2px); }
+    .stream-card:hover .stream-thumb iframe { opacity: 0.9; }
+
+    .stream-thumb {
+      position: relative; width: 100%; aspect-ratio: 16/9;
+      background: var(--bg3); border-radius: var(--radius); overflow: hidden;
+    }
+    .stream-thumb iframe {
+      position: absolute; inset: 0; width: 100%; height: 100%; border: 0;
+      transition: opacity .2s;
+    }
+    .stream-play-overlay {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0); transition: background .2s;
+      opacity: 0;
+    }
+    .stream-card:hover .stream-play-overlay { opacity: 1; background: rgba(0,0,0,0.3); }
+    .play-circle {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      transform: scale(0.8); transition: transform .2s;
+    }
+    .stream-card:hover .play-circle { transform: scale(1); }
+
+    .stream-live-tag {
+      position: absolute; top: 8px; left: 8px;
+      background: var(--red); color: #fff; font-size: .62rem;
+      font-weight: 700; letter-spacing: .5px; padding: 2px 6px;
+      border-radius: 2px; text-transform: uppercase;
+      display: none; /* hidden by default, shown only when confirmed live */
+    }
+    .stream-card.is-live .stream-live-tag { display: block; }
+
+    /* Card info — YT style */
+    .stream-card-info {
+      display: flex; gap: 10px; padding: 10px 0 4px;
+    }
+    .stream-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--red) 0%, #ff6b35 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    .stream-meta { flex: 1; min-width: 0; }
+    .stream-name {
+      font-size: .9rem; font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 3px; line-height: 1.3;
+    }
+    .stream-sub { font-size: .78rem; color: var(--text2); line-height: 1.4; }
+    .stream-sub span { display: block; }
+
+    /* ═══ CHANNEL BAR (horizontal scroll) ═══ */
+    .channel-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: 68px; z-index: 800;
+      background: var(--bg); border-top: 1px solid var(--border2);
+      display: flex; align-items: center;
+      padding: 0 16px; gap: 10px;
+    }
+    .bar-label {
+      flex-shrink: 0; display: flex; flex-direction: column; gap: 2px;
+    }
+    .bar-label-top {
+      font-family: var(--font-display); font-size: .9rem;
+      letter-spacing: 2px; color: var(--red);
+    }
+    .bar-label-sub { font-size: .6rem; color: var(--text3); letter-spacing: .5px; text-transform: uppercase; }
+    .bar-divider { width: 1px; height: 36px; background: var(--border); flex-shrink: 0; }
+
+    .channel-scroll {
+      display: flex; gap: 8px; overflow-x: auto; flex: 1;
+      scrollbar-width: none; padding: 6px 0; align-items: center;
+    }
+    .channel-scroll::-webkit-scrollbar { display: none; }
+
+    .ch-badge {
+      display: flex; align-items: center; gap: 7px; flex-shrink: 0;
+      padding: 5px 12px 5px 5px; background: var(--chip-bg);
+      border: 1px solid var(--border); border-radius: 20px;
+      cursor: pointer; transition: all .15s; white-space: nowrap;
+    }
+    .ch-badge:hover { background: var(--chip-hover); border-color: rgba(255,0,0,.35); }
+    .ch-badge.active { background: rgba(255,0,0,.15); border-color: var(--red); }
+    .ch-avatar {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--red), #ff6b35);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .55rem; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    .ch-name { font-size: .78rem; font-weight: 500; color: var(--text2); }
+    .ch-badge.active .ch-name { color: var(--red); }
+    .ch-online { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; animation: blink 2s infinite; }
+
+    /* ═══ DONATE BAR (thin strip at bottom above channel bar) ═══ */
+    .donate-strip {
+      position: fixed; bottom: 68px; left: 0; right: 0;
+      z-index: 790; height: 48px;
+      background: var(--bg2); border-top: 1px solid rgba(255,214,0,0.2);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; gap: 12px;
+    }
+    .donate-strip-left { display: flex; align-items: center; gap: 10px; }
+    .donate-strip-text { font-size: .78rem; color: var(--text2); }
+    .donate-strip-text strong { color: var(--gold); }
+    .btn-donate-strip {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 16px;
+      background: linear-gradient(135deg, #ffd600, #f9a825);
+      color: #000; font-weight: 700; font-size: .78rem;
+      border: none; border-radius: 20px; cursor: pointer;
+      box-shadow: 0 2px 12px rgba(255,214,0,.25);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-donate-strip:hover { transform: scale(1.04); box-shadow: 0 4px 18px rgba(255,214,0,.4); }
+
+    /* ═══ PLAYER MODAL ═══ */
+    .player-modal {
+      position: fixed; inset: 0; z-index: 2000;
+      background: var(--overlay); backdrop-filter: blur(16px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .player-modal.open { opacity: 1; pointer-events: all; }
+    .player-modal-inner {
+      width: min(92vw, 1100px); background: var(--bg2);
+      border-radius: 12px; overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,.7);
+      transform: translateY(20px) scale(.97);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+    }
+    .player-modal.open .player-modal-inner { transform: translateY(0) scale(1); }
+    .player-modal-video { position: relative; aspect-ratio: 16/9; background: #000; }
+    .player-modal-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+    .player-modal-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px; background: var(--bg2);
+      border-top: 1px solid var(--border2);
+    }
+    .modal-ch-name { font-family: var(--font-display); font-size: 1.3rem; letter-spacing: 2px; color: var(--text); }
+    .modal-close-btn {
+      width: 36px; height: 36px; background: var(--bg3);
+      border: 1px solid var(--border); border-radius: 50%;
+      color: var(--text); font-size: 1.2rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all .15s;
+    }
+    .modal-close-btn:hover { background: var(--red); border-color: var(--red); color: #fff; }
+
+    /* ═══ DONATE MODAL ═══ */
+    .donate-overlay {
+      display: none; position: fixed; inset: 0; z-index: 3000;
+      background: rgba(0,0,0,.88); backdrop-filter: blur(12px);
+      align-items: center; justify-content: center;
+    }
+    .donate-overlay.open { display: flex; }
+    .donate-box {
+      background: var(--bg2); border: 1px solid rgba(255,214,0,.2);
+      border-radius: 16px; padding: 36px 40px;
+      max-width: 420px; width: 90vw; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+      animation: popIn .25s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes popIn { from { transform: translateY(16px) scale(.97); opacity:0; } to { transform: none; opacity:1; } }
+    .donate-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .donate-title { font-family: var(--font-display); font-size: 1.8rem; letter-spacing: 2px; color: var(--gold); margin-bottom: 8px; }
+    .donate-desc { font-size: .84rem; color: var(--text2); margin-bottom: 22px; line-height: 1.6; }
+    .donate-links { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .donate-link-item {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px; text-align: left; cursor: pointer;
+      transition: border-color .15s; text-decoration: none; display: block;
+    }
+    .donate-link-item:hover { border-color: var(--gold); }
+    .donate-link-label { font-size: .62rem; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+    .donate-link-url { font-size: .9rem; font-weight: 600; color: var(--text); }
+    .donate-close-btn {
+      padding: 10px 28px; background: var(--red); color: #fff;
+      border: none; border-radius: 8px; font-weight: 700; font-size: .88rem;
+      cursor: pointer; transition: background .15s;
+    }
+    .donate-close-btn:hover { background: var(--red-dark); }
+
+    /* ═══ MULTIWATCH OVERLAY ═══ */
+    .multiwatch-overlay {
+      position: fixed; inset: 0; z-index: 1100;
+      background: #000; display: none; flex-direction: column;
+    }
+    .multiwatch-overlay.open { display: flex; }
+
+    .mw-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 16px; background: #0f0f0f;
+      border-bottom: 1px solid rgba(255,255,255,.08); flex-shrink: 0; gap: 10px;
+    }
+    .mw-topbar-left { display: flex; align-items: center; gap: 12px; }
+    .mw-logo {
+      font-family: var(--font-display); font-size: 1.1rem;
+      letter-spacing: 3px; color: var(--red);
+    }
+    .mw-layout-btns { display: flex; gap: 5px; }
+    .mw-layout-btn {
+      padding: 5px 13px; border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06); color: rgba(255,255,255,.5);
+      font-size: .72rem; font-weight: 600; letter-spacing: .5px;
+      border-radius: 20px; cursor: pointer; transition: all .15s;
+    }
+    .mw-layout-btn.active { border-color: var(--red); color: var(--red); background: rgba(255,0,0,.12); }
+    .mw-topbar-right { display: flex; align-items: center; gap: 8px; }
+    .mw-close-btn {
+      padding: 6px 16px; background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      color: #fff; font-size: .78rem; font-weight: 600;
+      border-radius: 20px; cursor: pointer; transition: background .15s;
+    }
+    .mw-close-btn:hover { background: rgba(255,255,255,.16); }
+
+    .mw-body { flex: 1; display: flex; overflow: hidden; min-height: 0; }
+    .mw-grid {
+      flex: 1; display: grid; gap: 3px; padding: 3px;
+      overflow: hidden; min-height: 0;
+    }
+    .mw-grid.layout-3 { grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr; }
+    .mw-grid.layout-4 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
+    .mw-grid.layout-6 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
+    .mw-grid.layout-9 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+
+    /* Chat sidebar */
+    .mw-chat-sidebar {
+      width: 0; flex-shrink: 0; background: #0d0d0d;
+      border-left: 1px solid rgba(255,255,255,.08);
+      display: flex; flex-direction: column;
+      overflow: hidden; transition: width .3s ease;
+    }
+    .mw-chat-sidebar.open { width: 340px; }
+    .mw-chat-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.08);
+      flex-shrink: 0; gap: 8px;
+    }
+    .mw-chat-title {
+      font-size: .68rem; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: rgba(255,255,255,.5);
+      display: flex; align-items: center; gap: 7px; flex: 1;
+    }
+    .mw-chat-title svg { color: var(--red); flex-shrink: 0; }
+    .btn-yt-login {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 10px; background: rgba(255,255,255,.1); color: rgba(255,255,255,.8);
+      font-size: .65rem; font-weight: 700; letter-spacing: .5px;
+      border: 1px solid rgba(255,255,255,.15); border-radius: 20px;
+      cursor: pointer; transition: background .15s; white-space: nowrap;
+    }
+    .btn-yt-login:hover { background: rgba(255,255,255,.18); }
+    .btn-yt-login.logged-in { background: rgba(0,200,83,.15); color: #00c853; border-color: rgba(0,200,83,.3); }
+    .yt-user-avatar { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+    .mw-chat-login-notice {
+      padding: 12px; background: rgba(255,0,0,.07);
+      border-bottom: 1px solid rgba(255,255,255,.06); flex-shrink: 0;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .mw-chat-login-notice p { font-size: .72rem; color: rgba(255,255,255,.4); line-height: 1.5; }
+    .mw-chat-login-notice.hidden { display: none; }
+    .mw-chat-tabs {
+      display: flex; gap: 4px; padding: 8px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.06); flex-shrink: 0;
+      overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none;
+    }
+    .mw-chat-tabs::-webkit-scrollbar { display: none; }
+    .mw-chat-tab {
+      padding: 4px 12px; border-radius: 20px; font-size: .68rem;
+      font-weight: 700; letter-spacing: .5px; cursor: pointer;
+      border: 1px solid rgba(255,255,255,.1); background: transparent;
+      color: rgba(255,255,255,.3); white-space: nowrap; flex-shrink: 0;
+      transition: all .15s;
+    }
+    .mw-chat-tab.active { background: rgba(255,0,0,.15); border-color: rgba(255,0,0,.5); color: var(--red); }
+    .mw-chat-frame-wrap { flex: 1; overflow: hidden; min-height: 0; position: relative; }
+    .mw-chat-frame-wrap iframe { width: 100%; height: 100%; border: 0; }
+    .mw-chat-loading {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 12px; background: #0d0d0d;
+    }
+    .mw-chat-loading-spinner {
+      width: 28px; height: 28px; border: 2px solid rgba(255,255,255,.08);
+      border-top-color: var(--red); border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .mw-chat-loading p { font-size: .72rem; color: rgba(255,255,255,.25); letter-spacing: 1px; }
+    .mw-chat-error {
+      position: absolute; inset: 0; display: none; flex-direction: column;
+      align-items: center; justify-content: center; gap: 12px;
+      background: #0d0d0d; padding: 20px; text-align: center;
+    }
+    .mw-chat-error.show { display: flex; }
+    .mw-chat-error-icon { font-size: 2rem; }
+    .mw-chat-error p { font-size: .72rem; color: rgba(255,255,255,.4); line-height: 1.6; }
+    .mw-chat-error small { font-size: .65rem; color: rgba(255,255,255,.2); }
+    .btn-open-chat-popup {
+      padding: 8px 16px; background: var(--red); color: #fff;
+      border: none; border-radius: 8px; font-size: .75rem; font-weight: 700;
+      cursor: pointer; transition: background .15s;
+    }
+    .btn-open-chat-popup:hover { background: var(--red-dark); }
+    .mw-chat-empty {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 10px; color: rgba(255,255,255,.2); padding: 20px; text-align: center; height: 100%;
+    }
+    .mw-chat-empty p { font-size: .78rem; line-height: 1.6; }
+    .btn-toggle-chat {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 12px; background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12); border-radius: 20px;
+      color: rgba(255,255,255,.5); font-size: .72rem; font-weight: 600;
+      cursor: pointer; transition: all .15s;
+    }
+    .btn-toggle-chat:hover { background: rgba(255,255,255,.12); color: #fff; }
+    .btn-toggle-chat.active { background: rgba(255,0,0,.15); border-color: rgba(255,0,0,.5); color: var(--red); }
+
+    /* MW Slots */
+    .mw-slot {
+      position: relative; background: #0a0a0a;
+      border-radius: 2px; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .mw-slot iframe { width: 100%; flex: 1; border: 0; min-height: 0; }
+    .mw-slot-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 5px 10px; background: #111; flex-shrink: 0;
+    }
+    .mw-slot-name { font-size: .7rem; font-weight: 600; color: rgba(255,255,255,.5); letter-spacing: .5px; }
+    .mw-slot-select {
+      font-size: .68rem; color: var(--red); cursor: pointer;
+      background: none; border: none; padding: 2px 6px; font-weight: 700;
+      transition: color .15s;
+    }
+    .mw-slot-select:hover { color: #fff; }
+    .mw-empty {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 10px; cursor: pointer;
+    }
+    .mw-empty-icon {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: rgba(255,0,0,.08); border: 2px dashed rgba(255,0,0,.25);
+      display: flex; align-items: center; justify-content: center;
+      transition: all .2s;
+    }
+    .mw-empty:hover .mw-empty-icon { background: rgba(255,0,0,.18); border-color: var(--red); }
+    .mw-empty-txt { font-size: .72rem; color: rgba(255,255,255,.2); letter-spacing: 1px; text-transform: uppercase; }
+
+    /* Channel picker */
+    .mw-picker-overlay {
+      position: fixed; inset: 0; z-index: 1200;
+      background: rgba(0,0,0,.88); display: none;
+      align-items: center; justify-content: center;
+    }
+    .mw-picker-overlay.open { display: flex; }
+    .mw-picker-box {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px; width: min(480px, 92vw);
+      max-height: 72vh; display: flex; flex-direction: column;
+    }
+    .mw-picker-title { font-family: var(--font-display); font-size: 1.15rem; letter-spacing: 2px; color: var(--text); margin-bottom: 14px; }
+    .mw-picker-search {
+      padding: 9px 14px; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: .85rem;
+      outline: none; margin-bottom: 12px; width: 100%; font-family: var(--font);
+    }
+    .mw-picker-search:focus { border-color: rgba(255,0,0,.5); }
+    .mw-picker-list { overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+    .mw-picker-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 9px 12px; border-radius: 8px; cursor: pointer;
+      transition: background .15s;
+    }
+    .mw-picker-item:hover { background: var(--chip-bg); }
+    .mw-picker-avatar {
+      width: 34px; height: 34px; border-radius: 50%; background: var(--red);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .72rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .mw-picker-ch-name { font-size: .88rem; font-weight: 500; color: var(--text); }
+    .mw-picker-cancel {
+      margin-top: 14px; padding: 8px; text-align: center; cursor: pointer;
+      color: var(--text3); font-size: .78rem; letter-spacing: 1px;
+      text-transform: uppercase; transition: color .15s;
+    }
+    .mw-picker-cancel:hover { color: var(--text2); }
+
+    /* Status bar */
+    .status-bar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px; background: rgba(255,214,0,.07);
+      border: 1px solid rgba(255,214,0,.18); border-radius: 8px;
+      margin-bottom: 28px;
+    }
+    .status-bar.done { background: rgba(0,200,83,.07); border-color: rgba(0,200,83,.2); }
+    .status-text {
+      display: flex; align-items: center; gap: 8px;
+      font-size: .82rem; font-weight: 500; color: var(--gold);
+    }
+    .status-bar.done .status-text { color: #4ade80; }
+    .spin-icon { animation: spin 1s linear infinite; }
+
+    /* Bottom spacing */
+    .page-bottom-spacer { height: 124px; }
+
+    /* ═══ RESPONSIVE ═══ */
+    @media (max-width: 900px) {
+      .stream-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px 10px; }
+      .hero-content { padding: 0 20px 32px; }
+      .section { padding: 0 12px 32px; }
+    }
+    @media (max-width: 640px) {
+      .nav-center { display: none; }
+      .hero { height: 52vh; }
+      .hero-content { padding: 0 16px 28px; }
+      .hero-badge, .btn-more { display: none; }
+      .stream-grid { grid-template-columns: 1fr 1fr; gap: 12px 8px; }
+      .stream-card-info { padding: 7px 0 2px; }
+      .stream-name { font-size: .82rem; }
+      .stream-sub { font-size: .72rem; }
+      .section { padding: 0 10px 28px; }
+      .donate-strip-text { display: none; }
+      .donate-strip { justify-content: space-between; padding: 0 12px 0 16px; }
+      .mw-chat-sidebar { display: none !important; }
+      .mw-grid.layout-3 { grid-template-columns: 1fr; grid-template-rows: repeat(3, 1fr); }
+      .mw-grid.layout-6 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); }
+      .mw-grid.layout-9 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 400px) {
+      .stream-grid { grid-template-columns: 1fr; }
+      .channel-bar { height: 60px; }
+      .donate-strip { bottom: 60px; }
+      .page-bottom-spacer { height: 116px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOADING ══ -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">
+    <div class="yt-mark">
+      <svg viewBox="0 0 24 24"><path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/></svg>
+    </div>
+    <span class="bfl"> BFL</span><span class="tv"> TV</span>
+  </div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+  <div class="loading-sub">Live Streaming</div>
+</div>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-left">
+    <button class="btn-menu" onclick="toggleSidebar()" aria-label="Menu">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    </button>
+    <a class="nav-logo" href="#">
+      <div class="yt-mark">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/></svg>
+      </div>
+      <span class="nav-logo-text">BFL <span>TV</span></span>
+    </a>
+  </div>
+
+  <div class="nav-center">
+    <div class="search-form">
+      <div class="search-input-wrap">
+        <input class="search-input" type="text" placeholder="Cari channel..." id="searchInput" oninput="filterSearch()">
+      </div>
+      <button class="btn-search" aria-label="Cari">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <div class="live-pill" id="livePill">
+      <span class="live-dot"></span>
+      <span id="navLiveCount">0</span> Live
+    </div>
+    <button class="btn-multiwatch" onclick="openMultiwatch()">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="9" height="7" rx="1"/><rect x="13" y="3" width="9" height="7" rx="1"/><rect x="2" y="14" width="9" height="7" rx="1"/><rect x="13" y="14" width="9" height="7" rx="1"/></svg>
+      MultiWatch
+    </button>
+    <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme">
+      <svg id="iconDark" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg id="iconLight" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72 1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ══ PAGE BODY ══ -->
+<div class="page-body" id="mainContent" style="display:none">
+
+  <!-- HERO -->
+  <div class="hero" id="heroSection">
+    <div class="hero-video-bg" id="heroWrap"></div>
+    <div class="hero-gradient"></div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="live-dot"></span>
+        Sedang Live
+      </div>
+      <div class="hero-title" id="heroTitle">BFL TV</div>
+      <div class="hero-sub">BFL TV — Tonton Live Sekarang</div>
+      <div class="hero-btns">
+        <button class="btn-watch" id="heroWatchBtn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          Tonton
+        </button>
+        <button class="btn-more" id="heroMoreBtn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+          Info
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="section" style="padding-bottom:0">
+    <div class="status-bar" id="statusBar">
+      <div class="status-text" id="statusText">
+        <svg class="spin-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+        Memeriksa status live channel...
+      </div>
+    </div>
+  </div>
+
+  <!-- CHANNELS SECTION -->
+  <div class="section" id="streamSection">
+    <div class="section-header">
+      <div class="section-title">
+        Channel Live
+        <span class="live-badge-sm">Live</span>
+      </div>
+      <div class="section-count" id="liveCountBadge">0 Channel</div>
+    </div>
+    <div class="stream-grid" id="streamGrid"></div>
+  </div>
+
+  <div class="page-bottom-spacer"></div>
+</div>
+
+<!-- ══ CHANNEL BAR ══ -->
+<div class="channel-bar" id="channelBar">
+  <div class="bar-label">
+    <div class="bar-label-top">BFL</div>
+    <div class="bar-label-sub">Channels</div>
+  </div>
+  <div class="bar-divider"></div>
+  <div class="channel-scroll" id="channelScroll"></div>
+</div>
+
+<!-- ══ DONATE STRIP ══ -->
+<div class="donate-strip">
+  <div class="donate-strip-left">
+    <span>💛</span>
+    <span class="donate-strip-text">Dukung <strong>BFL TV</strong> agar terus berkembang!</span>
+  </div>
+  <button class="btn-donate-strip" onclick="openDonate()">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402C1 3.204 4.069 1 7.07 1a6.5 6.5 0 0 1 4.93 2.065A6.5 6.5 0 0 1 16.93 1C19.931 1 23 3.204 23 7.191c0 4.105-5.37 8.863-11 14.402z"/></svg>
+    Donasi
+  </button>
+</div>
+
+<!-- ══ PLAYER MODAL ══ -->
+<div class="player-modal" id="playerModal">
+  <div class="player-modal-inner">
+    <div class="player-modal-video">
+      <iframe id="modalIframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div class="player-modal-bar">
+      <div class="modal-ch-name" id="modalChName">Channel</div>
+      <button class="modal-close-btn" onclick="closeModal()">✕</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DONATE MODAL ══ -->
+<div class="donate-overlay" id="donateModal">
+  <div class="donate-box">
+    <div class="donate-icon">💛</div>
+    <div class="donate-title">Dukung BFL TV</div>
+    <p class="donate-desc">BFL TV dibuat dengan ❤️ oleh <strong>@elvanprmn</strong>.<br>Bantu kami terus berkembang dengan donasi kecil Anda!</p>
+    <div class="donate-links">
+      <a href="https://bagibagi.co/elvanprmn" target="_blank" class="donate-link-item">
+        <div class="donate-link-label">BagiBagi</div>
+        <div class="donate-link-url">bagibagi.co/elvanprmn</div>
+      </a>
+    </div>
+    <button class="donate-close-btn" onclick="closeDonate()">Tutup</button>
+  </div>
+</div>
+
+<!-- ══ MULTIWATCH OVERLAY ══ -->
+<div class="multiwatch-overlay" id="multiwatchOverlay">
+  <div class="mw-topbar">
+    <div class="mw-topbar-left">
+      <div class="mw-logo">BFL TV</div>
+      <div class="mw-layout-btns">
+        <button class="mw-layout-btn active" id="mwBtn3" onclick="setMwLayout('3')">3</button>
+        <button class="mw-layout-btn" id="mwBtn4" onclick="setMwLayout('4')">4</button>
+        <button class="mw-layout-btn" id="mwBtn6" onclick="setMwLayout('6')">6</button>
+        <button class="mw-layout-btn" id="mwBtn9" onclick="setMwLayout('9')">9</button>
+      </div>
+      <button class="btn-toggle-chat" id="btnToggleChat" onclick="toggleChat()">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Chat
+      </button>
+    </div>
+    <div class="mw-topbar-right">
+      <button class="mw-close-btn" onclick="closeMultiwatch()">✕ Tutup</button>
+    </div>
+  </div>
+
+  <div class="mw-body">
+    <div class="mw-grid layout-3" id="mwGrid"></div>
+    <div class="mw-chat-sidebar" id="mwChatSidebar">
+      <div class="mw-chat-header">
+        <div class="mw-chat-title">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Live Chat
+        </div>
+      </div>
+      <div class="mw-chat-tabs" id="mwChatTabs"></div>
+      <div class="mw-chat-frame-wrap" id="mwChatFrameWrap">
+        <div class="mw-chat-empty" id="mwChatEmpty">
+          <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <p>Pilih channel untuk melihat live chat</p>
+        </div>
+        <div class="mw-chat-error" id="mwChatError">
+          <div class="mw-chat-error-icon">⚠️</div>
+          <p id="mwChatErrorDetail">Tidak dapat memuat chat.</p>
+          <small>YouTube mungkin memblokir embed dari domain ini.</small>
+          <button class="btn-open-chat-popup" onclick="openChatInPopup()">Buka di Popup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CHANNEL PICKER ══ -->
+<div class="mw-picker-overlay" id="mwPickerOverlay">
+  <div class="mw-picker-box">
+    <div class="mw-picker-title">Pilih Channel</div>
+    <input class="mw-picker-search" id="mwPickerSearch" placeholder="Cari channel..." oninput="filterPicker()">
+    <div class="mw-picker-list" id="mwPickerList"></div>
+    <div class="mw-picker-cancel" onclick="closePicker()">Batal</div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   KONFIGURASI CHANNEL
+   ════════════════════════════════════════ */
+const CHANNELS = [
+  { id: "UCCuzDCoI3EUOo_nhCj4noSw", name: "Marapthon"    },
+  { id: "UCJTq8YQXj-2_BNgwis4SGsg", name: "RonnyBons"    },
+  { id: "UCBu6n7CY3k_HdX8THmyEOEw", name: "Abeegel"      },
+  { id: "UCz4s1BgKNXTwOHO0PHQHQxQ", name: "Kafeyinhere"  },
+  { id: "UCsUhlZAanKWUsZxqbPbjAOw", name: "Fahrul Reyza" },
+  { id: "UCZHSRSIP9m2uxOAOlVJGytw", name: "Danny"         },
+  { id: "UCamUqGw_jBciNhBNwBcJFRg", name: "Nathann"       },
+  { id: "UCKciWscgYbPCuAdtX91x06w", name: "Deplonnn"      },
+  { id: "UCvrhggVJsdR6uYvuIrX_Grg", name: "Dipiwww"       },
+  { id: "UCrvlbX01F8qtXlJDXX7czVg", name: "Rey"           },
+  { id: "UCYKxEdT_OBIUv7_zJkyQkdg", name: "AndreMemet"    },
+  { id: "UCQV0qkau8jIHyn5iRY6bIcg", name: "Syacei"        },
+  { id: "UCKN2A4ShReXSHJER9_lfwLw", name: "Bopeng16"      },
+  { id: "UChEzBCVwQg3EC7QjsF3iZHw", name: "Zotafrz"       },
+  { id: "UC-x7sdu_4FNa5fsGDr3nfbQ", name: "Nanzz"         },
+  { id: "UCUC6Ovlo-UNQD5lKcLIn6Q",  name: "Neyna"         },
+  { id: "UCt2QdjyIsTHOVzFlTB37UeA", name: "artszzy"       },
+  { id: "UCb9tHaLY3XFM6V2Is_Z2R6A", name: "Eko D Libra"   },
+  { id: "UCgqC90SQYpod4-Ys-6NVUHw", name: "Edot"          },
+  { id: "UCZyUX_68LnJ-AA6REPU45Ew", name: "Jonanthan"     },
+  { id: "UCPnn55oMeLkr4IF8WTKTdQQ", name: "Sanca"         },
+  { id: "UCSU2OYfJXGQiCULNy0PAk7w", name: "Reggie"        },
+  { id: "UChQbgqNc8MARGDS17qmXiVw", name: "Robbeyu"       },
+  { id: "UCmaXAySgVu7Ptu17PeNCj6w", name: "Samm Kama"     },
+  { id: "UCCBHkKFT-XBsBnzVBrXs5Vw", name: "Paddang"       },
+  { id: "UCxnQ2cffx4Y5TcPkaWcDfLA", name: "JxxxN"         },
+  { id: "UCgqC90SQYpod4-Ys-6NVUHw", name: "Edotsi"        },
+  { id: "UCoxYH2IbvTZFCph-FrMXN4A", name: "Noahh"         },
+  { id: "UC9jZ5Wa13rtmCa7Gi1C94aQ", name: "Dandan"        },
+  { id: "UCEbWxsOYTODhzRaxaSzbzGA", name: "Hlynn"         },
+  { id: "UCdsrkASxJ8QtG55db06789w", name: "Jeffry"        },
+  { id: "UC8qd1G66ZssAsr8bf1rR-ww", name: "Tristan"       },
+  { id: "UC0mPJmfyM0pyysqo____vrg", name: "Nathanidk"     },
+  ];
+
+let activeChId = null;
+let allCards = [];
+
+/* ── THEME ── */
+(function() {
+  const hour = new Date().getHours();
+  const autoDark = hour < 6 || hour >= 18;
+  const saved = localStorage.getItem('bfltv_theme');
+  const theme = saved || (autoDark ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme', theme);
+  updateThemeIcon(theme);
+})();
+
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('bfltv_theme', next);
+  updateThemeIcon(next);
+}
+function updateThemeIcon(theme) {
+  const d = document.getElementById('iconDark');
+  const l = document.getElementById('iconLight');
+  if (!d || !l) return;
+  if (theme === 'dark') { d.style.display = 'block'; l.style.display = 'none'; }
+  else { d.style.display = 'none'; l.style.display = 'block'; }
+}
+
+/* ── SEARCH FILTER ── */
+function filterSearch() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  allCards.forEach(({ card, ch }) => {
+    card.style.display = ch.name.toLowerCase().includes(query) ? '' : 'none';
+  });
+}
+
+/* ── RENDER ALL CHANNELS ── */
+function renderAll() {
+  const grid   = document.getElementById('streamGrid');
+  const scroll = document.getElementById('channelScroll');
+  grid.innerHTML   = '';
+  scroll.innerHTML = '';
+  allCards = [];
+
+  CHANNELS.forEach(ch => {
+    const embedSrc = `https://www.youtube.com/embed/live_stream?channel=${ch.id}&autoplay=0&mute=1&controls=1`;
+    const init = ch.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+
+    // ── CARD (YouTube-style) ──
+    const card = document.createElement('div');
+    card.className  = 'stream-card';
+    card.dataset.id = ch.id;
+    card.innerHTML  = `
+      <div class="stream-thumb">
+        <iframe src="${embedSrc}" loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen></iframe>
+        <div class="stream-live-tag">Live</div>
+        <div class="stream-play-overlay">
+          <div class="play-circle">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="black"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="stream-card-info">
+        <div class="stream-avatar">${esc(init)}</div>
+        <div class="stream-meta">
+          <div class="stream-name">${esc(ch.name)}</div>
+          <div class="stream-sub">
+            <span>YouTube Live</span>
+            <span>BFL TV</span>
+          </div>
+        </div>
+      </div>`;
+    card.addEventListener('click', () => openModal(ch));
+    grid.appendChild(card);
+    allCards.push({ card, ch });
+
+    // ── BADGE (channel bar) ──
+    const badge = document.createElement('div');
+    badge.className  = 'ch-badge';
+    badge.dataset.id = ch.id;
+    badge.innerHTML  = `
+      <div class="ch-avatar">${esc(init)}</div>
+      <span class="ch-name">${esc(ch.name)}</span>`;
+    badge.addEventListener('click', () => {
+      activeChId = ch.id;
+      document.querySelectorAll('.ch-badge').forEach(b =>
+        b.classList.toggle('active', b.dataset.id === ch.id));
+      openModal(ch);
+    });
+    scroll.appendChild(badge);
+  });
+
+  document.getElementById('liveCountBadge').textContent = `${CHANNELS.length} Channel`;
+  document.getElementById('navLiveCount').textContent   = CHANNELS.length;
+
+  setHero(CHANNELS[0]);
+}
+
+/* ── HERO ── */
+function setHero(ch) {
+  document.getElementById('heroWrap').innerHTML =
+    `<iframe src="https://www.youtube.com/embed/live_stream?channel=${ch.id}&autoplay=1&mute=1&controls=0"
+       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+       allowfullscreen></iframe>`;
+  document.getElementById('heroTitle').textContent = ch.name;
+  document.getElementById('heroWatchBtn').onclick  = () => openModal(ch);
+  document.getElementById('heroMoreBtn').onclick   = () => {
+    document.getElementById('streamSection').scrollIntoView({ behavior: 'smooth' });
+  };
+}
+
+/* ── STATUS ── */
+function updateStatus(msg, done = false) {
+  const bar  = document.getElementById('statusBar');
+  const text = document.getElementById('statusText');
+  if (done) {
+    bar.classList.add('done');
+    text.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> ${msg}`;
+    setTimeout(() => { bar.style.display = 'none'; }, 3000);
+  } else {
+    text.innerHTML = `<svg class="spin-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> ${msg}`;
+  }
+}
+
+/* ── MODAL PLAYER ── */
+function openModal(ch) {
+  activeChId = ch.id;
+  document.querySelectorAll('.ch-badge').forEach(b =>
+    b.classList.toggle('active', b.dataset.id === ch.id));
+  document.getElementById('modalIframe').src =
+    `https://www.youtube.com/embed/live_stream?channel=${ch.id}&autoplay=1&mute=0&controls=1`;
+  document.getElementById('modalChName').textContent = ch.name;
+  document.getElementById('playerModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('playerModal').classList.remove('open');
+  setTimeout(() => { document.getElementById('modalIframe').src = ''; }, 300);
+  document.body.style.overflow = '';
+  activeChId = null;
+  document.querySelectorAll('.ch-badge').forEach(b => b.classList.remove('active'));
+}
+document.getElementById('playerModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('playerModal')) closeModal();
+});
+
+/* ── DONATE ── */
+function openDonate()  { document.getElementById('donateModal').classList.add('open'); }
+function closeDonate() { document.getElementById('donateModal').classList.remove('open'); }
+document.getElementById('donateModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('donateModal')) closeDonate();
+});
+
+/* ── NAVBAR SCROLL ── */
+window.addEventListener('scroll', () => {
+  const nb = document.getElementById('navbar');
+  nb.style.boxShadow = window.scrollY > 10
+    ? '0 2px 8px var(--shadow)' : 'none';
+});
+
+/* ── ESC KEY ── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeDonate(); closeMultiwatch(); }
+});
+
+function esc(str) {
+  const d = document.createElement('div'); d.textContent = str; return d.innerHTML;
+}
+
+/* ════════════════════════════════════════
+   MULTIWATCH
+   ════════════════════════════════════════ */
+let mwLayout = '3';
+let mwSlots  = [];
+let mwPickerTargetSlot = -1;
+let mwChatOpen = false;
+let mwActiveChatSlot = -1;
+const MW_LAYOUTS = { '3': 3, '4': 4, '6': 6, '9': 9 };
+
+function openMultiwatch() {
+  document.getElementById('multiwatchOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (mwSlots.length === 0) initMwSlots();
+  renderMwGrid();
+}
+function closeMultiwatch() {
+  document.getElementById('multiwatchOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  document.querySelectorAll('#mwGrid iframe').forEach(f => f.src = '');
+  if (mwChatOpen) toggleChat(true);
+}
+function setMwLayout(layout) {
+  mwLayout = layout;
+  document.querySelectorAll('.mw-layout-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('mwBtn' + layout).classList.add('active');
+  const count = MW_LAYOUTS[layout];
+  while (mwSlots.length < count) mwSlots.push({ ch: null });
+  renderMwGrid();
+  renderChatTabs();
+}
+function initMwSlots() {
+  mwSlots = [];
+  const count = MW_LAYOUTS[mwLayout];
+  for (let i = 0; i < count; i++)
+    mwSlots.push({ ch: i < CHANNELS.length ? CHANNELS[i] : null });
+}
+function renderMwGrid() {
+  const grid = document.getElementById('mwGrid');
+  grid.className = 'mw-grid layout-' + mwLayout;
+  const count = MW_LAYOUTS[mwLayout];
+  grid.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const slot = mwSlots[i] || { ch: null };
+    const div = document.createElement('div');
+    div.className = 'mw-slot';
+    if (slot.ch) {
+      const embedSrc = `https://www.youtube.com/embed/live_stream?channel=${slot.ch.id}&autoplay=1&mute=${i>0?1:0}&controls=1`;
+      div.innerHTML = `
+        <iframe src="${embedSrc}"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen></iframe>
+        <div class="mw-slot-bar">
+          <span class="mw-slot-name">${esc(slot.ch.name)}</span>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="mw-slot-select" onclick="chatFromSlot(${i})" title="Buka chat">💬</button>
+            <button class="mw-slot-select" onclick="openPicker(${i})">Ganti ▾</button>
+          </div>
+        </div>`;
+    } else {
+      div.innerHTML = `
+        <div class="mw-empty" onclick="openPicker(${i})">
+          <div class="mw-empty-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--red)"><path d="M12 4v16m-8-8h16"/></svg>
+          </div>
+          <span class="mw-empty-txt">Pilih Channel</span>
+        </div>
+        <div class="mw-slot-bar">
+          <span class="mw-slot-name" style="color:rgba(255,255,255,.2)">Slot ${i+1}</span>
+          <button class="mw-slot-select" onclick="openPicker(${i})">Pilih ▾</button>
+        </div>`;
+    }
+    grid.appendChild(div);
+  }
+  renderChatTabs();
+}
+
+function chatFromSlot(slotIdx) {
+  if (!mwChatOpen) toggleChat();
+  switchChatTab(slotIdx);
+}
+
+/* ── LIVE CHAT ── */
+function toggleChat(forceClose) {
+  mwChatOpen = forceClose ? false : !mwChatOpen;
+  const sidebar = document.getElementById('mwChatSidebar');
+  const btn     = document.getElementById('btnToggleChat');
+  sidebar.classList.toggle('open', mwChatOpen);
+  btn.classList.toggle('active', mwChatOpen);
+  if (mwChatOpen && mwActiveChatSlot < 0) {
+    const first = mwSlots.findIndex(s => s && s.ch);
+    if (first >= 0) switchChatTab(first);
+  }
+}
+function renderChatTabs() {
+  const tabs = document.getElementById('mwChatTabs');
+  tabs.innerHTML = '';
+  const count = MW_LAYOUTS[mwLayout];
+  for (let i = 0; i < count; i++) {
+    const slot = mwSlots[i];
+    if (!slot || !slot.ch) continue;
+    const tab = document.createElement('button');
+    tab.className = 'mw-chat-tab' + (i === mwActiveChatSlot ? ' active' : '');
+    tab.textContent = slot.ch.name.split(' ')[0];
+    tab.title = slot.ch.name;
+    tab.onclick = () => switchChatTab(i);
+    tabs.appendChild(tab);
+  }
+}
+const videoIdCache = {};
+async function getVideoId(channelId) {
+  if (videoIdCache[channelId]) return videoIdCache[channelId];
+  try {
+    const resp = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/channel/${channelId}/live`, { signal: AbortSignal.timeout(4000) });
+    const data = await resp.json();
+    const match = data?.thumbnail_url?.match(/\/vi\/([^/]+)\//);
+    if (match) { videoIdCache[channelId] = match[1]; return match[1]; }
+  } catch(e) {}
+  return null;
+}
+let currentChatChannelId = null;
+async function switchChatTab(slotIdx) {
+  mwActiveChatSlot = slotIdx;
+  renderChatTabs();
+  const slot = mwSlots[slotIdx];
+  const wrap  = document.getElementById('mwChatFrameWrap');
+  const empty = document.getElementById('mwChatEmpty');
+  const error = document.getElementById('mwChatError');
+  error.classList.remove('show');
+  wrap.querySelector('iframe')?.remove();
+  if (!slot || !slot.ch) { empty.style.display = 'flex'; return; }
+  empty.style.display = 'none';
+  currentChatChannelId = slot.ch.id;
+  let loadingEl = wrap.querySelector('.mw-chat-loading');
+  if (!loadingEl) {
+    loadingEl = document.createElement('div');
+    loadingEl.className = 'mw-chat-loading';
+    loadingEl.innerHTML = `<div class="mw-chat-loading-spinner"></div><p>Memuat chat...</p>`;
+    wrap.appendChild(loadingEl);
+  }
+  loadingEl.style.display = 'flex';
+  const videoId = await getVideoId(slot.ch.id);
+  loadingEl.style.display = 'none';
+  if (!videoId) { showChatError(slot.ch, null); return; }
+  const domain = location.hostname || 'localhost';
+  const chatUrl = `https://www.youtube.com/live_chat?v=${videoId}&embed_domain=${domain}&dark_theme=1`;
+  const iframe = document.createElement('iframe');
+  iframe.src = chatUrl;
+  iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media';
+  iframe.style.cssText = 'width:100%;height:100%;border:0;';
+  let loaded = false;
+  iframe.onload = () => { loaded = true; error.classList.remove('show'); };
+  setTimeout(() => { if (!loaded) showChatError(slot.ch, videoId); }, 5000);
+  wrap.appendChild(iframe);
+  wrap.dataset.videoId = videoId;
+  wrap.dataset.channelId = slot.ch.id;
+  wrap.dataset.channelName = slot.ch.name;
+}
+function showChatError(ch, videoId) {
+  const error  = document.getElementById('mwChatError');
+  const detail = document.getElementById('mwChatErrorDetail');
+  detail.textContent = videoId
+    ? `Video ID: ${videoId} — YouTube memblokir embed chat dari domain ini.`
+    : `Channel "${ch.name}" mungkin belum live atau belum mendukung chat.`;
+  error.classList.add('show');
+  document.getElementById('mwChatFrameWrap').dataset.videoId = videoId || '';
+  document.getElementById('mwChatFrameWrap').dataset.channelId = ch.id;
+}
+function openChatInPopup() {
+  const wrap = document.getElementById('mwChatFrameWrap');
+  const videoId = wrap.dataset.videoId;
+  const channelId = wrap.dataset.channelId;
+  const url = videoId
+    ? `https://www.youtube.com/live_chat?v=${videoId}&is_popout=1`
+    : `https://www.youtube.com/channel/${channelId}/live`;
+  window.open(url, '_blank', 'width=380,height=600,left=100,top=100');
+}
+
+/* ── PICKER ── */
+function openPicker(slotIdx) {
+  mwPickerTargetSlot = slotIdx;
+  document.getElementById('mwPickerSearch').value = '';
+  renderPickerList('');
+  document.getElementById('mwPickerOverlay').classList.add('open');
+}
+function closePicker() {
+  document.getElementById('mwPickerOverlay').classList.remove('open');
+  mwPickerTargetSlot = -1;
+}
+function filterPicker() {
+  renderPickerList(document.getElementById('mwPickerSearch').value.toLowerCase());
+}
+function renderPickerList(query) {
+  const list = document.getElementById('mwPickerList');
+  list.innerHTML = '';
+  CHANNELS.filter(ch => ch.name.toLowerCase().includes(query)).forEach(ch => {
+    const init = ch.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    const item = document.createElement('div');
+    item.className = 'mw-picker-item';
+    item.innerHTML = `<div class="mw-picker-avatar">${esc(init)}</div><span class="mw-picker-ch-name">${esc(ch.name)}</span>`;
+    item.onclick = () => selectChannelForSlot(ch);
+    list.appendChild(item);
+  });
+}
+function selectChannelForSlot(ch) {
+  if (mwPickerTargetSlot < 0) return;
+  if (!mwSlots[mwPickerTargetSlot]) mwSlots[mwPickerTargetSlot] = {};
+  mwSlots[mwPickerTargetSlot].ch = ch;
+  if (mwPickerTargetSlot === mwActiveChatSlot) switchChatTab(mwActiveChatSlot);
+  closePicker();
+  renderMwGrid();
+}
+document.getElementById('mwPickerOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('mwPickerOverlay')) closePicker();
+});
+
+/* ── INIT ── */
+function init() {
+  setTimeout(() => {
+    document.getElementById('loadingScreen').classList.add('hidden');
+    document.getElementById('mainContent').style.display = 'block';
+  }, 1400);
+  updateStatus('Memeriksa status live semua channel...');
+  renderAll();
+  setTimeout(() => updateStatus(`${CHANNELS.length} channel tersedia`, true), 2000);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
