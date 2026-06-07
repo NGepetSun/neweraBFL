@@ -5,18 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BFL TV — Live Streaming</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     /* ═══ THEME VARIABLES ═══ */
     :root {
-      --red: #ff0000;
-      --red-dark: #cc0000;
-      --red-glow: rgba(255,0,0,0.25);
+      --red: #E50914;
+      --red-dark: #b20710;
+      --red-glow: rgba(229,9,20,0.3);
       --green: #00c853;
       --gold: #ffd600;
-      --font: 'Roboto', sans-serif;
+      --font: 'Barlow', sans-serif;
       --font-display: 'Bebas Neue', sans-serif;
       --navbar-h: 56px;
       --transition: 0.2s ease;
@@ -26,21 +26,21 @@
 
     /* DARK THEME */
     [data-theme="dark"] {
-      --bg: #0f0f0f;
-      --bg2: #181818;
-      --bg3: #212121;
-      --bg4: #272727;
-      --surface: #282828;
+      --bg: #141414;
+      --bg2: #1c1c1c;
+      --bg3: #232323;
+      --bg4: #2d2d2d;
+      --surface: #1f1f1f;
       --border: rgba(255,255,255,0.1);
       --border2: rgba(255,255,255,0.06);
-      --text: #f1f1f1;
+      --text: #e5e5e5;
       --text2: #aaaaaa;
       --text3: #717171;
       --text4: #3f3f3f;
-      --chip-bg: rgba(255,255,255,0.1);
-      --chip-hover: rgba(255,255,255,0.18);
-      --shadow: rgba(0,0,0,0.5);
-      --overlay: rgba(0,0,0,0.9);
+      --chip-bg: rgba(255,255,255,0.08);
+      --chip-hover: rgba(255,255,255,0.16);
+      --shadow: rgba(0,0,0,0.6);
+      --overlay: rgba(0,0,0,0.92);
     }
 
     /* LIGHT THEME */
@@ -105,10 +105,16 @@
       position: fixed; top: 0; left: 0; right: 0; z-index: 900;
       height: var(--navbar-h);
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 16px;
-      background: var(--bg);
-      border-bottom: 1px solid var(--border2);
+      padding: 0 24px;
+      background: linear-gradient(to bottom, rgba(20,20,20,0.98) 0%, rgba(20,20,20,0.75) 100%);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      backdrop-filter: blur(8px);
       gap: 8px;
+      transition: background 0.3s;
+    }
+    [data-theme="light"] .navbar {
+      background: linear-gradient(to bottom, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.92) 100%);
+      border-bottom: 1px solid var(--border2);
     }
 
     .nav-left { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
@@ -211,7 +217,76 @@
     .btn-multiwatch:hover { background: var(--chip-hover); color: var(--text); }
     .btn-multiwatch svg { flex-shrink: 0; }
 
-    /* ═══ CHIP BAR placeholder - removed ═══ */
+    /* Admin button */
+    .btn-admin {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 16px; background: var(--red);
+      border: none; border-radius: 4px;
+      color: #fff; font-size: .78rem; font-weight: 700;
+      font-family: var(--font); cursor: pointer; letter-spacing: .5px;
+      transition: background .15s; white-space: nowrap;
+    }
+    .btn-admin:hover { background: var(--red-dark); }
+
+    /* ═══ ADMIN / LOGIN MODAL ═══ */
+    .admin-overlay {
+      position: fixed; inset: 0; z-index: 3500;
+      background: rgba(0,0,0,.85); backdrop-filter: blur(10px);
+      display: none; align-items: center; justify-content: center;
+    }
+    .admin-overlay.open { display: flex; }
+    .admin-box {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 32px; width: min(520px, 94vw);
+      animation: popIn .22s cubic-bezier(.4,0,.2,1);
+    }
+    .admin-title {
+      font-family: var(--font-display); font-size: 1.6rem; letter-spacing: 3px;
+      color: var(--text); margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
+    .admin-title span { color: var(--red); }
+    .admin-field { margin-bottom: 14px; }
+    .admin-label { display: block; font-size: .7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+    .admin-input {
+      width: 100%; padding: 10px 14px; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--bg3);
+      color: var(--text); font-family: var(--font); font-size: .9rem;
+      outline: none; transition: border .2s;
+    }
+    .admin-input:focus { border-color: var(--red); }
+    .admin-err { font-size: .78rem; color: #ff5252; margin-top: 10px; display: none; }
+    .btn-admin-submit {
+      width: 100%; padding: 12px; margin-top: 6px; border-radius: 6px; border: none;
+      background: var(--red); color: #fff; font-family: var(--font);
+      font-size: .92rem; font-weight: 700; cursor: pointer; transition: background .2s;
+    }
+    .btn-admin-submit:hover { background: var(--red-dark); }
+    .admin-divider { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
+    .admin-section-label { font-size: .68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; }
+    .admin-ch-list { display: flex; flex-direction: column; gap: 5px; max-height: 200px; overflow-y: auto; margin-bottom: 14px; }
+    .admin-ch-list::-webkit-scrollbar { width: 4px; }
+    .admin-ch-list::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+    .admin-ch-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 7px;
+    }
+    .admin-ch-item-name { font-size: .82rem; font-weight: 600; color: var(--text); min-width: 80px; }
+    .admin-ch-item-id { font-size: .72rem; color: var(--text3); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: monospace; }
+    .admin-ch-del { width: 26px; height: 26px; border-radius: 5px; border: none; background: rgba(229,9,20,.15); color: var(--red); cursor: pointer; font-size: 13px; font-weight: 700; transition: all .2s; flex-shrink: 0; }
+    .admin-ch-del:hover { background: var(--red); color: #fff; }
+    .admin-add-row { display: grid; grid-template-columns: 1fr 2fr auto; gap: 8px; align-items: end; }
+    .admin-add-row .admin-field { margin: 0; }
+    .btn-add-ch { padding: 10px 16px; border-radius: 6px; border: none; background: var(--red); color: #fff; font-family: var(--font); font-size: .82rem; font-weight: 700; cursor: pointer; height: 38px; white-space: nowrap; transition: background .2s; }
+    .btn-add-ch:hover { background: var(--red-dark); }
+    .btn-admin-logout { width: 100%; padding: 9px; margin-top: 16px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text3); font-family: var(--font); font-size: .82rem; cursor: pointer; transition: all .2s; }
+    .btn-admin-logout:hover { border-color: var(--red); color: var(--red); }
+    .admin-close-btn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border); background: transparent; color: var(--text2); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: auto; transition: all .15s; }
+    .admin-close-btn:hover { background: var(--red); border-color: var(--red); color: #fff; }
+    .admin-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+
+    /* Live counter (navbar) */
+    .live-pill { cursor: default; }
+    #navLiveCount { font-weight: 800; }
 
     /* ═══ MAIN LAYOUT ═══ */
     .page-body {
@@ -428,7 +503,8 @@
     }
     .ch-name { font-size: .78rem; font-weight: 500; color: var(--text2); }
     .ch-badge.active .ch-name { color: var(--red); }
-    .ch-online { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; animation: blink 2s infinite; }
+    .ch-online { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; animation: blink 2s infinite; display: none; }
+    .ch-online.is-live { display: block; }
 
     /* ═══ DONATE BAR (thin strip at bottom above channel bar) ═══ */
     .donate-strip {
@@ -824,6 +900,7 @@
       <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="9" height="7" rx="1"/><rect x="13" y="3" width="9" height="7" rx="1"/><rect x="2" y="14" width="9" height="7" rx="1"/><rect x="13" y="14" width="9" height="7" rx="1"/></svg>
       MultiWatch
     </button>
+    <button class="btn-admin" id="btnAdmin" onclick="handleAdminBtn()">⚙ Admin</button>
     <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme">
       <svg id="iconDark" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       <svg id="iconLight" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72 1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
@@ -991,6 +1068,52 @@
   </div>
 </div>
 
+<!-- ══ ADMIN LOGIN MODAL ══ -->
+<div class="admin-overlay" id="adminLoginOverlay">
+  <div class="admin-box" style="max-width:400px">
+    <div class="admin-header-row">
+      <div class="admin-title">Admin <span>BFL TV</span></div>
+      <button class="admin-close-btn" onclick="closeAdminLogin()">✕</button>
+    </div>
+    <div class="admin-field">
+      <label class="admin-label">Username</label>
+      <input class="admin-input" id="alUser" type="text" placeholder="admin" autocomplete="off">
+    </div>
+    <div class="admin-field">
+      <label class="admin-label">Password</label>
+      <input class="admin-input" id="alPass" type="password" placeholder="••••••••">
+    </div>
+    <div class="admin-err" id="alErr">Username atau password salah.</div>
+    <button class="btn-admin-submit" id="alSubmit">Masuk</button>
+  </div>
+</div>
+
+<!-- ══ ADMIN PANEL MODAL ══ -->
+<div class="admin-overlay" id="adminPanelOverlay">
+  <div class="admin-box">
+    <div class="admin-header-row">
+      <div class="admin-title">Kelola <span>Channel</span></div>
+      <button class="admin-close-btn" onclick="closeAdminPanel()">✕</button>
+    </div>
+    <div class="admin-section-label">Channel Aktif (<span id="adminChCount">0</span>)</div>
+    <div class="admin-ch-list" id="adminChList"></div>
+    <hr class="admin-divider">
+    <div class="admin-section-label">Tambah Channel Baru</div>
+    <div class="admin-add-row">
+      <div class="admin-field">
+        <label class="admin-label">Nama</label>
+        <input class="admin-input" id="addChName" type="text" placeholder="Nama channel">
+      </div>
+      <div class="admin-field">
+        <label class="admin-label">YouTube Channel ID</label>
+        <input class="admin-input" id="addChId" type="text" placeholder="UCxxxxxxxxxxxxxxx">
+      </div>
+      <button class="btn-add-ch" id="addChBtn">+ Tambah</button>
+    </div>
+    <button class="btn-admin-logout" id="adminLogoutBtn">Keluar dari Admin</button>
+  </div>
+</div>
+
 <script>
 /* ════════════════════════════════════════
    KONFIGURASI CHANNEL
@@ -1119,7 +1242,8 @@ function renderAll() {
     badge.dataset.id = ch.id;
     badge.innerHTML  = `
       <div class="ch-avatar">${esc(init)}</div>
-      <span class="ch-name">${esc(ch.name)}</span>`;
+      <span class="ch-name">${esc(ch.name)}</span>
+      <span class="ch-online" id="online-${ch.id}"></span>`;
     badge.addEventListener('click', () => {
       activeChId = ch.id;
       document.querySelectorAll('.ch-badge').forEach(b =>
@@ -1129,10 +1253,13 @@ function renderAll() {
     scroll.appendChild(badge);
   });
 
-  document.getElementById('liveCountBadge').textContent = `${CHANNELS.length} Channel`;
-  document.getElementById('navLiveCount').textContent   = CHANNELS.length;
+  document.getElementById('liveCountBadge').textContent = `0 Live`;
+  document.getElementById('navLiveCount').textContent   = 0;
 
   setHero(CHANNELS[0]);
+
+  // Start live detection for all cards
+  requestAnimationFrame(() => detectLiveAll());
 }
 
 /* ── HERO ── */
@@ -1205,6 +1332,166 @@ document.addEventListener('keydown', e => {
 function esc(str) {
   const d = document.createElement('div'); d.textContent = str; return d.innerHTML;
 }
+
+/* ── LIVE DETECTION ── */
+const liveChannels = new Set();
+
+function detectLiveAll() {
+  CHANNELS.forEach(ch => {
+    const card = document.querySelector(`.stream-card[data-id="${ch.id}"]`);
+    if (!card) return;
+    const iframe = card.querySelector('iframe');
+    if (!iframe) return;
+
+    iframe.addEventListener('load', function onLoad() {
+      let isLive = false;
+      try {
+        // Cross-origin: if no error thrown, page loaded = assume live
+        const doc = iframe.contentDocument;
+        isLive = !!(doc && doc.readyState !== 'loading');
+      } catch {
+        // cross-origin block = page loaded successfully = live
+        isLive = true;
+      }
+      if (isLive) {
+        liveChannels.add(ch.id);
+      } else {
+        liveChannels.delete(ch.id);
+      }
+      updateLiveUI(ch.id, isLive);
+    }, { once: false });
+
+    iframe.addEventListener('error', function() {
+      liveChannels.delete(ch.id);
+      updateLiveUI(ch.id, false);
+    });
+  });
+}
+
+function updateLiveUI(chId, isLive) {
+  // Card badge
+  const card = document.querySelector(`.stream-card[data-id="${chId}"]`);
+  if (card) {
+    if (isLive) card.classList.add('is-live');
+    else card.classList.remove('is-live');
+  }
+  // Channel bar dot
+  const dot = document.getElementById(`online-${chId}`);
+  if (dot) {
+    if (isLive) dot.classList.add('is-live');
+    else dot.classList.remove('is-live');
+  }
+  // Update counter
+  const total = liveChannels.size;
+  document.getElementById('navLiveCount').textContent = total;
+  document.getElementById('liveCountBadge').textContent = `${total} Live`;
+}
+
+/* ── ADMIN SYSTEM ── */
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'permana123A';
+let isAdmin = false;
+
+function loadChannels() {
+  const saved = localStorage.getItem('bfltv_channels');
+  if (saved) {
+    try {
+      const arr = JSON.parse(saved);
+      if (Array.isArray(arr) && arr.length > 0) {
+        CHANNELS.length = 0;
+        arr.forEach(c => CHANNELS.push(c));
+      }
+    } catch(e) {}
+  }
+}
+
+function saveChannels() {
+  localStorage.setItem('bfltv_channels', JSON.stringify(CHANNELS));
+}
+
+function handleAdminBtn() {
+  if (isAdmin) { openAdminPanel(); }
+  else { openAdminLogin(); }
+}
+
+function openAdminLogin() {
+  document.getElementById('adminLoginOverlay').classList.add('open');
+}
+function closeAdminLogin() {
+  document.getElementById('adminLoginOverlay').classList.remove('open');
+  document.getElementById('alUser').value = '';
+  document.getElementById('alPass').value = '';
+  document.getElementById('alErr').style.display = 'none';
+}
+document.getElementById('alSubmit').onclick = () => {
+  const u = document.getElementById('alUser').value.trim();
+  const p = document.getElementById('alPass').value;
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    isAdmin = true;
+    closeAdminLogin();
+    openAdminPanel();
+  } else {
+    document.getElementById('alErr').style.display = 'block';
+  }
+};
+document.getElementById('alPass').onkeydown = e => {
+  if (e.key === 'Enter') document.getElementById('alSubmit').click();
+};
+document.getElementById('adminLoginOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('adminLoginOverlay')) closeAdminLogin();
+});
+
+function openAdminPanel() {
+  renderAdminChList();
+  document.getElementById('adminPanelOverlay').classList.add('open');
+}
+function closeAdminPanel() {
+  document.getElementById('adminPanelOverlay').classList.remove('open');
+}
+document.getElementById('adminPanelOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('adminPanelOverlay')) closeAdminPanel();
+});
+
+document.getElementById('adminLogoutBtn').onclick = () => {
+  isAdmin = false;
+  closeAdminPanel();
+};
+
+function renderAdminChList() {
+  const list = document.getElementById('adminChList');
+  document.getElementById('adminChCount').textContent = CHANNELS.length;
+  list.innerHTML = '';
+  CHANNELS.forEach((ch, idx) => {
+    const item = document.createElement('div');
+    item.className = 'admin-ch-item';
+    item.innerHTML = `
+      <span class="admin-ch-item-name">${esc(ch.name)}</span>
+      <span class="admin-ch-item-id">${esc(ch.id)}</span>
+      <button class="admin-ch-del" data-idx="${idx}" title="Hapus">✕</button>`;
+    list.appendChild(item);
+  });
+  list.querySelectorAll('.admin-ch-del').forEach(btn => {
+    btn.onclick = () => {
+      const idx = parseInt(btn.dataset.idx);
+      CHANNELS.splice(idx, 1);
+      saveChannels();
+      renderAdminChList();
+      renderAll();
+    };
+  });
+}
+
+document.getElementById('addChBtn').onclick = () => {
+  const name = document.getElementById('addChName').value.trim();
+  const id   = document.getElementById('addChId').value.trim();
+  if (!name || !id) return;
+  CHANNELS.push({ id, name });
+  saveChannels();
+  document.getElementById('addChName').value = '';
+  document.getElementById('addChId').value   = '';
+  renderAdminChList();
+  renderAll();
+};
 
 /* ════════════════════════════════════════
    MULTIWATCH
@@ -1424,13 +1711,14 @@ document.getElementById('mwPickerOverlay').addEventListener('click', e => {
 
 /* ── INIT ── */
 function init() {
+  loadChannels();
   setTimeout(() => {
     document.getElementById('loadingScreen').classList.add('hidden');
     document.getElementById('mainContent').style.display = 'block';
   }, 1400);
   updateStatus('Memeriksa status live semua channel...');
   renderAll();
-  setTimeout(() => updateStatus(`${CHANNELS.length} channel tersedia`, true), 2000);
+  setTimeout(() => updateStatus(`${CHANNELS.length} channel dimuat`, true), 2000);
 }
 
 document.addEventListener('DOMContentLoaded', init);
