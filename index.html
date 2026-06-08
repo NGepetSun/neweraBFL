@@ -1276,79 +1276,55 @@ function applyFilter(){
   });
 }
 
-/* ── LIVE DETECTION via HTML scraping (tanpa API) ── */
-// Fetch halaman /channel/{id}/live lewat CORS proxy
-// Cek apakah HTML mengandung tanda live dari YouTube
-// 0 kuota API — aman untuk banyak user
-
-// Daftar CORS proxy fallback (dicoba urut jika gagal)
-const CORS_PROXIES = [
-  id => `https://corsproxy.io/?url=${encodeURIComponent('https://www.youtube.com/channel/'+id+'/live')}`,
-  id => `https://api.allorigins.win/get?url=${encodeURIComponent('https://www.youtube.com/channel/'+id+'/live')}`,
-];
-
-// Keyword yang ada di HTML YouTube saat channel sedang live
-const LIVE_SIGNALS = [
-  '"isLiveBroadcast":true',
-  '"style":"LIVE"',
-  'watching now',
-  '"liveBroadcastDetails"',
-  '"broadcastType":"LIVE"',
-];
-
-async function fetchWithProxy(channelId, proxyIdx=0){
-  if(proxyIdx >= CORS_PROXIES.length) return null;
-  try{
-    const url = CORS_PROXIES[proxyIdx](channelId);
-    const res = await fetch(url, {signal: AbortSignal.timeout(8000)});
-    if(!res.ok) return fetchWithProxy(channelId, proxyIdx+1);
-    const data = await res.json().catch(()=>null);
-    // allorigins wraps di data.contents, corsproxy langsung text
-    if(data && data.contents) return data.contents;
-    return await res.text().catch(()=>null);
-  }catch(e){
-    return fetchWithProxy(channelId, proxyIdx+1);
-  }
-}
+/* ── LIVE DETECTION via oEmbed (tanpa API, tanpa CORS proxy) ── */
+// YouTube oEmbed endpoint tidak kena CORS dan tidak butuh API key.
+// Cara: fetch oembed URL live_stream channel → jika berhasil dapat title = sedang live.
+// URL: https://www.youtube.com/oembed?url=https://www.youtube.com/channel/{ID}/live&format=json
+//
+// Jika channel TIDAK live → YouTube return 404 / error → kita tandai offline
+// Jika channel LIVE       → YouTube return JSON dengan title stream → kita tandai live
 
 async function checkLiveSingle(ch){
+  const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent('https://www.youtube.com/channel/'+ch.id+'/live')}&format=json`;
   try{
-    const html = await fetchWithProxy(ch.id);
-    if(!html){ setLive(ch.id,false); return; }
-
-    // Cek apakah ada sinyal live di HTML
-    const isLive = LIVE_SIGNALS.some(sig => html.includes(sig));
-
-    // Coba ekstrak videoId dari HTML jika live
-    if(isLive){
-      // YouTube embed live stream URL mengandung videoId di canonicalUrl atau og:video
-      const vidMatch = html.match(/"videoId":"([a-zA-Z0-9_-]{11})"/);
-      if(vidMatch) liveVideoIds[ch.id] = vidMatch[1];
-      else delete liveVideoIds[ch.id];
+    const res = await fetch(oembedUrl, {signal: AbortSignal.timeout(10000)});
+    if(res.ok){
+      const data = await res.json();
+      // Berhasil dapat data = channel sedang live
+      const isLive = !!(data && data.title);
+      // Coba ambil videoId dari thumbnail_url oembed
+      // Format: https://i.ytimg.com/vi/{videoId}/hqdefault.jpg
+      if(isLive && data.thumbnail_url){
+        const vidMatch = data.thumbnail_url.match(/\/vi\/([a-zA-Z0-9_-]{11})\//);
+        if(vidMatch) liveVideoIds[ch.id] = vidMatch[1];
+        else delete liveVideoIds[ch.id];
+      } else {
+        delete liveVideoIds[ch.id];
+      }
+      setLive(ch.id, isLive);
     } else {
+      // 404 = tidak live
       delete liveVideoIds[ch.id];
+      setLive(ch.id, false);
     }
-
-    setLive(ch.id, isLive);
   }catch(e){
-    console.warn('[BFL TV] Live check error:', ch.name, e);
+    // Network error / timeout → anggap offline, jangan crash
+    delete liveVideoIds[ch.id];
     setLive(ch.id, false);
   }
 }
 
 async function startLiveDetect(){
-  // Check sekali saat halaman dimuat
   await runLiveDetect();
 }
 
 async function runLiveDetect(){
-  // Batch 3 channel sekaligus agar tidak flood proxy
-  const BATCH = 3;
+  // Batch 5 sekaligus — oembed ringan, tidak perlu jeda panjang
+  const BATCH = 5;
   for(let i=0;i<CHANNELS.length;i+=BATCH){
     const slice = CHANNELS.slice(i,i+BATCH);
     await Promise.all(slice.map(ch=>checkLiveSingle(ch)));
-    // Jeda antar batch supaya proxy tidak blokir
-    if(i+BATCH < CHANNELS.length) await new Promise(r=>setTimeout(r,500));
+    if(i+BATCH < CHANNELS.length) await new Promise(r=>setTimeout(r,300));
   }
 }
 
