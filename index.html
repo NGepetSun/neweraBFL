@@ -975,6 +975,7 @@ let channelData = {}; // cache YT API data: { [id]: { thumb, subs, videoCount, t
 let customAvatars = {}; // { [id]: url }
 let tickerItems = [];
 let liveSet = new Set();
+let liveVideoIds = {}; // { [channelId]: videoId } — ID video live aktif
 let currentFilter = 'all';
 let isAdmin = false;
 const ADMIN_USER = 'admin';
@@ -1275,22 +1276,82 @@ function applyFilter(){
   });
 }
 
-/* ── LIVE DETECTION via iframe ── */
-function startLiveDetect(){
-  CHANNELS.forEach(ch=>{
-    const iframe=document.createElement('iframe');
-    iframe.style.cssText='display:none;width:0;height:0;position:absolute;opacity:0;pointer-events:none';
-    iframe.src=`https://www.youtube.com/embed/live_stream?channel=${ch.id}&autoplay=0&mute=1`;
-    document.body.appendChild(iframe);
-    iframe.addEventListener('load',()=>{
-      let live=false;
-      try{ const d=iframe.contentDocument; live=!!(d&&d.readyState!=='loading') }
-      catch{ live=true }
-      setLive(ch.id,live);
-    });
-    iframe.addEventListener('error',()=>setLive(ch.id,false));
-  });
+/* ── LIVE DETECTION via HTML scraping (tanpa API) ── */
+// Fetch halaman /channel/{id}/live lewat CORS proxy
+// Cek apakah HTML mengandung tanda live dari YouTube
+// 0 kuota API — aman untuk banyak user
+
+// Daftar CORS proxy fallback (dicoba urut jika gagal)
+const CORS_PROXIES = [
+  id => `https://corsproxy.io/?url=${encodeURIComponent('https://www.youtube.com/channel/'+id+'/live')}`,
+  id => `https://api.allorigins.win/get?url=${encodeURIComponent('https://www.youtube.com/channel/'+id+'/live')}`,
+];
+
+// Keyword yang ada di HTML YouTube saat channel sedang live
+const LIVE_SIGNALS = [
+  '"isLiveBroadcast":true',
+  '"style":"LIVE"',
+  'watching now',
+  '"liveBroadcastDetails"',
+  '"broadcastType":"LIVE"',
+];
+
+async function fetchWithProxy(channelId, proxyIdx=0){
+  if(proxyIdx >= CORS_PROXIES.length) return null;
+  try{
+    const url = CORS_PROXIES[proxyIdx](channelId);
+    const res = await fetch(url, {signal: AbortSignal.timeout(8000)});
+    if(!res.ok) return fetchWithProxy(channelId, proxyIdx+1);
+    const data = await res.json().catch(()=>null);
+    // allorigins wraps di data.contents, corsproxy langsung text
+    if(data && data.contents) return data.contents;
+    return await res.text().catch(()=>null);
+  }catch(e){
+    return fetchWithProxy(channelId, proxyIdx+1);
+  }
 }
+
+async function checkLiveSingle(ch){
+  try{
+    const html = await fetchWithProxy(ch.id);
+    if(!html){ setLive(ch.id,false); return; }
+
+    // Cek apakah ada sinyal live di HTML
+    const isLive = LIVE_SIGNALS.some(sig => html.includes(sig));
+
+    // Coba ekstrak videoId dari HTML jika live
+    if(isLive){
+      // YouTube embed live stream URL mengandung videoId di canonicalUrl atau og:video
+      const vidMatch = html.match(/"videoId":"([a-zA-Z0-9_-]{11})"/);
+      if(vidMatch) liveVideoIds[ch.id] = vidMatch[1];
+      else delete liveVideoIds[ch.id];
+    } else {
+      delete liveVideoIds[ch.id];
+    }
+
+    setLive(ch.id, isLive);
+  }catch(e){
+    console.warn('[BFL TV] Live check error:', ch.name, e);
+    setLive(ch.id, false);
+  }
+}
+
+async function startLiveDetect(){
+  // Check sekali saat halaman dimuat
+  await runLiveDetect();
+}
+
+async function runLiveDetect(){
+  // Batch 3 channel sekaligus agar tidak flood proxy
+  const BATCH = 3;
+  for(let i=0;i<CHANNELS.length;i+=BATCH){
+    const slice = CHANNELS.slice(i,i+BATCH);
+    await Promise.all(slice.map(ch=>checkLiveSingle(ch)));
+    // Jeda antar batch supaya proxy tidak blokir
+    if(i+BATCH < CHANNELS.length) await new Promise(r=>setTimeout(r,500));
+  }
+}
+
 function setLive(id,live){
   if(live) liveSet.add(id); else liveSet.delete(id);
   // Card
@@ -1309,8 +1370,13 @@ function setLive(id,live){
 /* ── PLAYER ── */
 function openPlayer(e,id,name){
   if(e) e.stopPropagation();
-  document.getElementById('playerIframe').src=`https://www.youtube.com/embed/live_stream?channel=${id}&autoplay=1&mute=0&controls=1`;
-  document.getElementById('playerChName').textContent=name;
+  // Jika channel sedang live dan ada videoId, gunakan embed video langsung
+  const vid=liveVideoIds[id];
+  const embedSrc=vid
+    ? `https://www.youtube.com/embed/${vid}?autoplay=1&mute=0&controls=1`
+    : `https://www.youtube.com/embed/live_stream?channel=${id}&autoplay=1&mute=0&controls=1`;
+  document.getElementById('playerIframe').src=embedSrc;
+  document.getElementById('playerChName').textContent=name+(liveSet.has(id)?' 🔴 LIVE':'');
   document.getElementById('playerModal').classList.add('open');
   document.body.style.overflow='hidden';
 }
@@ -1523,8 +1589,12 @@ function renderMwGrid(){
     const div=document.createElement('div');
     div.className='mw-slot';
     if(slot.ch){
+      const vid=liveVideoIds[slot.ch.id];
+      const embedSrc=vid
+        ? `https://www.youtube.com/embed/${vid}?autoplay=1&mute=${i>0?1:0}&controls=1`
+        : `https://www.youtube.com/embed/live_stream?channel=${slot.ch.id}&autoplay=1&mute=${i>0?1:0}&controls=1`;
       div.innerHTML=`
-        <iframe src="https://www.youtube.com/embed/live_stream?channel=${slot.ch.id}&autoplay=1&mute=${i>0?1:0}&controls=1"
+        <iframe src="${embedSrc}"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         <div class="mw-slot-bar">
           <span class="mw-slot-name">${esc(slot.ch.name)}</span>
