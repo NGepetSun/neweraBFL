@@ -1,1724 +1,1605 @@
 <!DOCTYPE html>
 <html lang="id" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BFL TV — Live Streaming</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BFL TV — Live Streaming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 
-    /* ═══ THEME VARIABLES ═══ */
-    :root {
-      --red: #E50914;
-      --red-dark: #b20710;
-      --red-glow: rgba(229,9,20,0.3);
-      --green: #00c853;
-      --gold: #ffd600;
-      --font: 'Barlow', sans-serif;
-      --font-display: 'Bebas Neue', sans-serif;
-      --navbar-h: 56px;
-      --transition: 0.2s ease;
-      --radius: 8px;
-      --radius-sm: 4px;
-    }
+:root{
+  --red:#E50914;--red-dk:#b20710;--red-glow:rgba(229,9,20,.25);
+  --green:#00e676;--gold:#FFD60A;
+  --font:'DM Sans',sans-serif;--font-display:'Syne',sans-serif;
+  --nav-h:60px;--ticker-h:38px;--bar-h:66px;
+  --r:12px;--r-sm:8px;--r-xs:6px;
+  --ease:.2s ease;
+}
+[data-theme="dark"]{
+  --bg:#0e0e0e;--bg2:#161616;--bg3:#1e1e1e;--bg4:#272727;--bg5:#323232;
+  --surface:#1a1a1a;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.04);
+  --text:#f0f0f0;--text2:#909090;--text3:#555;--text4:#2a2a2a;
+  --chip:rgba(255,255,255,.07);--chip-hv:rgba(255,255,255,.13);
+  --shadow:rgba(0,0,0,.7);--overlay:rgba(0,0,0,.9);
+  --glow:rgba(229,9,20,.15);
+}
+[data-theme="light"]{
+  --bg:#f5f5f5;--bg2:#fff;--bg3:#f0f0f0;--bg4:#e8e8e8;--bg5:#ddd;
+  --surface:#fff;
+  --border:rgba(0,0,0,.09);--border2:rgba(0,0,0,.04);
+  --text:#111;--text2:#555;--text3:#999;--text4:#e0e0e0;
+  --chip:rgba(0,0,0,.05);--chip-hv:rgba(0,0,0,.1);
+  --shadow:rgba(0,0,0,.12);--overlay:rgba(255,255,255,.92);
+  --glow:rgba(229,9,20,.08);
+}
 
-    /* DARK THEME */
-    [data-theme="dark"] {
-      --bg: #141414;
-      --bg2: #1c1c1c;
-      --bg3: #232323;
-      --bg4: #2d2d2d;
-      --surface: #1f1f1f;
-      --border: rgba(255,255,255,0.1);
-      --border2: rgba(255,255,255,0.06);
-      --text: #e5e5e5;
-      --text2: #aaaaaa;
-      --text3: #717171;
-      --text4: #3f3f3f;
-      --chip-bg: rgba(255,255,255,0.08);
-      --chip-hover: rgba(255,255,255,0.16);
-      --shadow: rgba(0,0,0,0.6);
-      --overlay: rgba(0,0,0,0.92);
-    }
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:hidden;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:3px}
 
-    /* LIGHT THEME */
-    [data-theme="light"] {
-      --bg: #ffffff;
-      --bg2: #f9f9f9;
-      --bg3: #f2f2f2;
-      --bg4: #e5e5e5;
-      --surface: #f2f2f2;
-      --border: rgba(0,0,0,0.1);
-      --border2: rgba(0,0,0,0.06);
-      --text: #0f0f0f;
-      --text2: #606060;
-      --text3: #909090;
-      --text4: #d3d3d3;
-      --chip-bg: rgba(0,0,0,0.05);
-      --chip-hover: rgba(0,0,0,0.1);
-      --shadow: rgba(0,0,0,0.1);
-      --overlay: rgba(255,255,255,0.95);
-    }
+/* ─── LOADING ─── */
+.loading-screen{
+  position:fixed;inset:0;background:#080808;z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;
+  transition:opacity .6s ease,visibility .6s ease;
+}
+.loading-screen.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.ls-logo{font-family:var(--font-display);font-size:3.2rem;font-weight:800;letter-spacing:6px;display:flex;align-items:center;gap:6px}
+.ls-logo .bfl{color:#fff}.ls-logo .tv{color:var(--red)}
+.ls-bar{width:180px;height:2px;background:#1e1e1e;border-radius:1px;overflow:hidden}
+.ls-fill{height:100%;background:var(--red);animation:lsfill 1.6s ease-in-out forwards}
+@keyframes lsfill{from{width:0}to{width:100%}}
+.ls-sub{font-size:.65rem;letter-spacing:4px;color:#333;text-transform:uppercase}
 
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font);
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-      transition: background 0.3s ease, color 0.3s ease;
-    }
+/* ─── TICKER ─── */
+.ticker-wrap{
+  position:fixed;top:0;left:0;right:0;z-index:800;
+  height:var(--ticker-h);background:var(--red);
+  display:flex;align-items:center;overflow:hidden;
+}
+.ticker-label{
+  flex-shrink:0;padding:0 18px;font-family:var(--font-display);
+  font-size:.65rem;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;color:#fff;
+  background:rgba(0,0,0,.25);height:100%;display:flex;align-items:center;
+  border-right:1px solid rgba(255,255,255,.2);white-space:nowrap;
+}
+.ticker-track{flex:1;overflow:hidden;position:relative;height:100%}
+.ticker-inner{
+  display:flex;align-items:center;height:100%;
+  white-space:nowrap;animation:tickerMove 30s linear infinite;
+}
+@keyframes tickerMove{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+.ticker-item{
+  font-size:.78rem;font-weight:500;color:#fff;
+  padding:0 32px;opacity:.95;letter-spacing:.3px;
+}
+.ticker-item::before{content:'◆';margin-right:12px;font-size:.5rem;opacity:.7}
 
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+/* ─── NAVBAR ─── */
+.navbar{
+  position:fixed;top:var(--ticker-h);left:0;right:0;z-index:700;
+  height:var(--nav-h);display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;gap:12px;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+}
+.nav-left{display:flex;align-items:center;gap:14px;flex-shrink:0}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.nav-center{flex:1;max-width:480px}
 
-    /* ═══ LOADING SCREEN ═══ */
-    .loading-screen {
-      position: fixed; inset: 0; background: #000;
-      z-index: 9999; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 24px;
-      transition: opacity .5s ease, visibility .5s ease;
-    }
-    .loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-    .loading-logo {
-      display: flex; align-items: center; gap: 4px;
-      font-family: var(--font-display); font-size: 3rem; letter-spacing: 4px;
-    }
-    .loading-logo .bfl { color: #fff; }
-    .loading-logo .tv { color: var(--red); }
-    .loading-logo .yt-icon {
-      width: 44px; height: 31px; background: var(--red); border-radius: 8px;
-      display: flex; align-items: center; justify-content: center; margin-right: 8px;
-    }
-    .loader-bar { width: 200px; height: 3px; background: #222; border-radius: 2px; overflow: hidden; }
-    .loader-fill { height: 100%; background: var(--red); animation: loadfill 1.8s ease-in-out forwards; }
-    @keyframes loadfill { from { width:0 } to { width:100% } }
-    .loading-sub { font-size: .72rem; letter-spacing: 3px; color: #555; text-transform: uppercase; }
+/* Logo */
+.nav-logo{display:flex;align-items:center;gap:8px;text-decoration:none;cursor:pointer;flex-shrink:0}
+.logo-mark{
+  width:36px;height:36px;background:var(--red);border-radius:var(--r-xs);
+  display:flex;align-items:center;justify-content:center;
+}
+.logo-mark svg{width:20px;fill:#fff}
+.logo-text{font-family:var(--font-display);font-size:1.25rem;font-weight:800;
+  letter-spacing:3px;color:var(--text);line-height:1}
+.logo-text span{color:var(--red)}
 
-    /* ═══ NAVBAR ═══ */
-    .navbar {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 900;
-      height: var(--navbar-h);
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 24px;
-      background: linear-gradient(to bottom, rgba(20,20,20,0.98) 0%, rgba(20,20,20,0.75) 100%);
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      backdrop-filter: blur(8px);
-      gap: 8px;
-      transition: background 0.3s;
-    }
-    [data-theme="light"] .navbar {
-      background: linear-gradient(to bottom, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.92) 100%);
-      border-bottom: 1px solid var(--border2);
-    }
+/* Search */
+.search-wrap{
+  display:flex;align-items:center;gap:0;
+  border:1px solid var(--border);border-radius:40px;
+  background:var(--bg3);overflow:hidden;transition:border .2s;
+}
+.search-wrap:focus-within{border-color:rgba(229,9,20,.5)}
+.search-input{
+  flex:1;padding:9px 16px;border:none;background:none;
+  color:var(--text);font-family:var(--font);font-size:.85rem;outline:none;
+}
+.search-input::placeholder{color:var(--text3)}
+.btn-search{
+  padding:0 16px;height:100%;border:none;background:none;
+  color:var(--text2);cursor:pointer;display:flex;align-items:center;
+  transition:color .15s;
+}
+.btn-search:hover{color:var(--red)}
 
-    .nav-left { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
-    .nav-center { flex: 1; max-width: 600px; display: flex; align-items: center; gap: 8px; }
-    .nav-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+/* Icon button */
+.btn-icon{
+  width:38px;height:38px;border-radius:50%;
+  background:none;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text2);transition:background .15s,color .15s;
+}
+.btn-icon:hover{background:var(--chip);color:var(--text)}
+.btn-icon svg{width:20px;height:20px}
 
-    /* Hamburger */
-    .btn-menu {
-      width: 40px; height: 40px; border-radius: 50%;
-      background: none; border: none; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--text); transition: background .15s;
-    }
-    .btn-menu:hover { background: var(--chip-bg); }
+/* Live pill */
+.live-chip{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 12px;border-radius:20px;
+  background:rgba(229,9,20,.12);border:1px solid rgba(229,9,20,.28);
+  font-size:.68rem;font-weight:700;letter-spacing:1.5px;color:var(--red);
+  cursor:default;
+}
+.live-dot{width:7px;height:7px;background:var(--red);border-radius:50%;
+  animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-    /* Logo */
-    .nav-logo {
-      display: flex; align-items: center; gap: 2px;
-      cursor: pointer; text-decoration: none; flex-shrink: 0;
-    }
-    .nav-logo .yt-mark {
-      width: 34px; height: 24px; background: var(--red);
-      border-radius: 6px; display: flex; align-items: center; justify-content: center;
-    }
-    .nav-logo .yt-mark svg { width: 20px; fill: #fff; }
-    .nav-logo-text {
-      font-family: var(--font-display); font-size: 1.3rem; letter-spacing: 2px;
-      color: var(--text); margin-left: 4px; line-height: 1;
-    }
-    .nav-logo-text span { color: var(--red); }
+/* Admin btn */
+.btn-admin{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 16px;background:var(--red);border:none;border-radius:var(--r-xs);
+  color:#fff;font-family:var(--font);font-size:.76rem;font-weight:600;
+  letter-spacing:.3px;cursor:pointer;transition:background .15s;white-space:nowrap;
+}
+.btn-admin:hover{background:var(--red-dk)}
 
-    /* Search bar */
-    .search-form {
-      flex: 1; display: flex; align-items: center;
-      max-width: 500px;
-    }
-    .search-input-wrap {
-      flex: 1; display: flex; align-items: center;
-      border: 1px solid var(--border);
-      border-radius: 40px 0 0 40px;
-      background: var(--bg);
-      padding: 0 16px; height: 40px;
-      transition: border-color .15s;
-    }
-    .search-input-wrap:focus-within { border-color: #1c62b9; }
-    .search-input {
-      flex: 1; border: none; background: none;
-      color: var(--text); font-size: .9rem; outline: none;
-      font-family: var(--font);
-    }
-    .search-input::placeholder { color: var(--text3); }
-    .btn-search {
-      width: 64px; height: 40px;
-      background: var(--bg3); border: 1px solid var(--border);
-      border-left: none; border-radius: 0 40px 40px 0;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      color: var(--text2); transition: background .15s;
-    }
-    .btn-search:hover { background: var(--bg4); color: var(--text); }
+/* ─── PAGE BODY ─── */
+.page-body{
+  padding-top:calc(var(--ticker-h) + var(--nav-h));
+  padding-bottom:calc(var(--bar-h) + 32px);
+  min-height:100vh;
+}
 
-    /* Icon buttons */
-    .btn-icon {
-      width: 40px; height: 40px; border-radius: 50%;
-      background: none; border: none; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--text2); transition: background .15s; position: relative;
-    }
-    .btn-icon:hover { background: var(--chip-bg); color: var(--text); }
-    .btn-icon svg { width: 22px; height: 22px; }
+/* ─── INTRO STRIP ─── */
+.intro-strip{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;
+  padding:24px 28px 0;
+}
+.intro-title{
+  font-family:var(--font-display);font-size:1.6rem;font-weight:800;
+  letter-spacing:1px;color:var(--text);
+}
+.intro-title span{color:var(--red)}
+.intro-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.intro-count{
+  font-size:.72rem;font-weight:600;letter-spacing:1px;
+  padding:4px 12px;border-radius:20px;
+  background:var(--chip);color:var(--text2);border:1px solid var(--border);
+}
+.intro-count.live{background:rgba(229,9,20,.1);color:var(--red);border-color:rgba(229,9,20,.25)}
 
-    /* Theme toggle */
-    .theme-toggle-btn {
-      width: 40px; height: 40px; border-radius: 50%;
-      background: none; border: none; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--text2); transition: background .15s;
-    }
-    .theme-toggle-btn:hover { background: var(--chip-bg); color: var(--text); }
+/* Filter tabs */
+.filter-row{
+  display:flex;align-items:center;gap:8px;
+  padding:16px 28px 0;overflow-x:auto;
+  scrollbar-width:none;
+}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-tab{
+  padding:6px 16px;border-radius:20px;
+  border:1px solid var(--border);background:var(--chip);
+  color:var(--text2);font-size:.76rem;font-weight:500;
+  cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;
+}
+.filter-tab:hover{background:var(--chip-hv);color:var(--text)}
+.filter-tab.active{background:var(--red);border-color:var(--red);color:#fff}
 
-    /* Live pill */
-    .live-pill {
-      display: flex; align-items: center; gap: 6px;
-      background: rgba(255,0,0,.12); border: 1px solid rgba(255,0,0,.3);
-      border-radius: 20px; padding: 4px 12px;
-      font-size: .72rem; font-weight: 700; letter-spacing: 1.5px; color: var(--red);
-      cursor: pointer; transition: background .15s;
-    }
-    .live-pill:hover { background: rgba(255,0,0,.2); }
-    .live-dot { width: 7px; height: 7px; background: var(--red); border-radius: 50%; flex-shrink: 0; animation: blink 1.4s infinite; }
-    @keyframes blink { 0%,100% { opacity:1; box-shadow:0 0 0 0 var(--red-glow); } 50% { opacity:.4; box-shadow:0 0 0 4px transparent; } }
+/* ─── CHANNEL GRID ─── */
+.section{padding:20px 28px 0}
+.channel-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:16px;
+  margin-top:16px;
+}
 
-    /* Multiwatch button */
-    .btn-multiwatch {
-      display: flex; align-items: center; gap: 6px;
-      padding: 6px 14px; background: var(--chip-bg);
-      border: 1px solid var(--border); border-radius: 20px;
-      color: var(--text2); font-size: .78rem; font-weight: 600;
-      cursor: pointer; transition: all .15s; white-space: nowrap;
-    }
-    .btn-multiwatch:hover { background: var(--chip-hover); color: var(--text); }
-    .btn-multiwatch svg { flex-shrink: 0; }
+/* ─── CHANNEL CARD ─── */
+.ch-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;
+  cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s;
+  position:relative;
+}
+.ch-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 12px 40px var(--shadow);
+  border-color:rgba(229,9,20,.3);
+}
 
-    /* Admin button */
-    .btn-admin {
-      display: flex; align-items: center; gap: 6px;
-      padding: 7px 16px; background: var(--red);
-      border: none; border-radius: 4px;
-      color: #fff; font-size: .78rem; font-weight: 700;
-      font-family: var(--font); cursor: pointer; letter-spacing: .5px;
-      transition: background .15s; white-space: nowrap;
-    }
-    .btn-admin:hover { background: var(--red-dark); }
+/* Card top accent */
+.ch-card-accent{
+  height:3px;
+  background:linear-gradient(90deg,var(--red),transparent);
+  opacity:0;transition:opacity .2s;
+}
+.ch-card:hover .ch-card-accent{opacity:1}
+.ch-card.is-live .ch-card-accent{opacity:1;background:linear-gradient(90deg,var(--red),var(--red-dk))}
 
-    /* ═══ ADMIN / LOGIN MODAL ═══ */
-    .admin-overlay {
-      position: fixed; inset: 0; z-index: 3500;
-      background: rgba(0,0,0,.85); backdrop-filter: blur(10px);
-      display: none; align-items: center; justify-content: center;
-    }
-    .admin-overlay.open { display: flex; }
-    .admin-box {
-      background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 12px; padding: 32px; width: min(520px, 94vw);
-      animation: popIn .22s cubic-bezier(.4,0,.2,1);
-    }
-    .admin-title {
-      font-family: var(--font-display); font-size: 1.6rem; letter-spacing: 3px;
-      color: var(--text); margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
-    }
-    .admin-title span { color: var(--red); }
-    .admin-field { margin-bottom: 14px; }
-    .admin-label { display: block; font-size: .7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
-    .admin-input {
-      width: 100%; padding: 10px 14px; border-radius: 6px;
-      border: 1px solid var(--border); background: var(--bg3);
-      color: var(--text); font-family: var(--font); font-size: .9rem;
-      outline: none; transition: border .2s;
-    }
-    .admin-input:focus { border-color: var(--red); }
-    .admin-err { font-size: .78rem; color: #ff5252; margin-top: 10px; display: none; }
-    .btn-admin-submit {
-      width: 100%; padding: 12px; margin-top: 6px; border-radius: 6px; border: none;
-      background: var(--red); color: #fff; font-family: var(--font);
-      font-size: .92rem; font-weight: 700; cursor: pointer; transition: background .2s;
-    }
-    .btn-admin-submit:hover { background: var(--red-dark); }
-    .admin-divider { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
-    .admin-section-label { font-size: .68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; }
-    .admin-ch-list { display: flex; flex-direction: column; gap: 5px; max-height: 200px; overflow-y: auto; margin-bottom: 14px; }
-    .admin-ch-list::-webkit-scrollbar { width: 4px; }
-    .admin-ch-list::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
-    .admin-ch-item {
-      display: flex; align-items: center; gap: 10px; padding: 8px 12px;
-      background: var(--bg3); border: 1px solid var(--border); border-radius: 7px;
-    }
-    .admin-ch-item-name { font-size: .82rem; font-weight: 600; color: var(--text); min-width: 80px; }
-    .admin-ch-item-id { font-size: .72rem; color: var(--text3); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: monospace; }
-    .admin-ch-del { width: 26px; height: 26px; border-radius: 5px; border: none; background: rgba(229,9,20,.15); color: var(--red); cursor: pointer; font-size: 13px; font-weight: 700; transition: all .2s; flex-shrink: 0; }
-    .admin-ch-del:hover { background: var(--red); color: #fff; }
-    .admin-add-row { display: grid; grid-template-columns: 1fr 2fr auto; gap: 8px; align-items: end; }
-    .admin-add-row .admin-field { margin: 0; }
-    .btn-add-ch { padding: 10px 16px; border-radius: 6px; border: none; background: var(--red); color: #fff; font-family: var(--font); font-size: .82rem; font-weight: 700; cursor: pointer; height: 38px; white-space: nowrap; transition: background .2s; }
-    .btn-add-ch:hover { background: var(--red-dark); }
-    .btn-admin-logout { width: 100%; padding: 9px; margin-top: 16px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text3); font-family: var(--font); font-size: .82rem; cursor: pointer; transition: all .2s; }
-    .btn-admin-logout:hover { border-color: var(--red); color: var(--red); }
-    .admin-close-btn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border); background: transparent; color: var(--text2); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: auto; transition: all .15s; }
-    .admin-close-btn:hover { background: var(--red); border-color: var(--red); color: #fff; }
-    .admin-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+/* Card body */
+.ch-card-body{padding:20px}
 
-    /* Live counter (navbar) */
-    .live-pill { cursor: default; }
-    #navLiveCount { font-weight: 800; }
+/* Avatar row */
+.ch-avatar-row{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px}
+.ch-avatar-wrap{position:relative;flex-shrink:0}
+.ch-avatar{
+  width:64px;height:64px;border-radius:50%;
+  background:var(--bg4);overflow:hidden;
+  border:2.5px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .2s;
+}
+.ch-card:hover .ch-avatar{border-color:rgba(229,9,20,.5)}
+.ch-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.ch-avatar-init{
+  font-family:var(--font-display);font-size:1.3rem;font-weight:800;
+  color:var(--red);letter-spacing:0;
+}
+/* Custom avatar override */
+.ch-avatar.has-custom img{display:block}
 
-    /* ═══ MAIN LAYOUT ═══ */
-    .page-body {
-      padding-top: var(--navbar-h);
-      min-height: 100vh;
-    }
+/* LIVE badge on avatar */
+.ch-live-ring{
+  position:absolute;inset:-3px;border-radius:50%;
+  border:2.5px solid transparent;pointer-events:none;
+}
+.ch-card.is-live .ch-live-ring{
+  border-color:var(--red);
+  box-shadow:0 0 10px rgba(229,9,20,.5);
+  animation:pulseRing 2s ease infinite;
+}
+@keyframes pulseRing{0%,100%{opacity:1}50%{opacity:.5}}
+.ch-live-badge{
+  position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);
+  background:var(--red);color:#fff;font-size:.52rem;font-weight:800;
+  letter-spacing:1.5px;padding:2px 6px;border-radius:4px;
+  display:none;white-space:nowrap;
+}
+.ch-card.is-live .ch-live-badge{display:block}
 
-    /* ═══ HERO SECTION ═══ */
-    .hero {
-      position: relative; height: 65vh; min-height: 400px;
-      display: flex; align-items: flex-end;
-      overflow: hidden; margin-bottom: 32px;
-    }
-    .hero-video-bg {
-      position: absolute; inset: 0;
-    }
-    .hero-video-bg iframe {
-      width: 100%; height: calc(100% + 80px);
-      margin-top: -40px; border: 0; pointer-events: none;
-    }
-    .hero-gradient {
-      position: absolute; inset: 0;
-      background: linear-gradient(
-        to top,
-        var(--bg) 0%,
-        rgba(0,0,0,0.7) 25%,
-        rgba(0,0,0,0.2) 60%,
-        transparent 100%
-      );
-    }
-    .hero-gradient::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(
-        to right,
-        rgba(0,0,0,0.9) 0%,
-        rgba(0,0,0,0.4) 40%,
-        transparent 70%
-      );
-    }
-    [data-theme="light"] .hero-gradient {
-      background: linear-gradient(
-        to top,
-        var(--bg) 0%,
-        rgba(255,255,255,0.5) 30%,
-        transparent 70%
-      );
-    }
-    [data-theme="light"] .hero-gradient::after {
-      background: linear-gradient(
-        to right,
-        rgba(255,255,255,0.85) 0%,
-        rgba(255,255,255,0.3) 40%,
-        transparent 70%
-      );
-    }
-    .hero-content {
-      position: relative; z-index: 2;
-      padding: 0 40px 40px; max-width: 560px;
-    }
-    .hero-badge {
-      display: inline-flex; align-items: center; gap: 7px;
-      font-size: .7rem; font-weight: 700; letter-spacing: 2px;
-      color: var(--red); text-transform: uppercase; margin-bottom: 10px;
-    }
-    .hero-title {
-      font-family: var(--font-display); font-size: clamp(2.5rem, 5vw, 4.5rem);
-      line-height: 1; letter-spacing: 2px; color: #fff;
-      margin-bottom: 10px; text-shadow: 0 2px 20px rgba(0,0,0,0.8);
-    }
-    [data-theme="light"] .hero-title { color: var(--text); text-shadow: none; }
-    .hero-sub { font-size: .88rem; color: rgba(255,255,255,0.75); margin-bottom: 20px; }
-    [data-theme="light"] .hero-sub { color: var(--text2); }
-    .hero-btns { display: flex; gap: 10px; flex-wrap: wrap; }
-    .btn-watch {
-      display: flex; align-items: center; gap: 8px;
-      padding: 10px 24px; background: rgba(255,255,255,0.95);
-      color: #000; font-weight: 700; font-size: .92rem;
-      border: none; border-radius: var(--radius-sm); cursor: pointer;
-      transition: background .15s, transform .15s;
-    }
-    .btn-watch:hover { background: rgba(255,255,255,0.8); transform: scale(1.02); }
-    [data-theme="light"] .btn-watch { background: var(--text); color: var(--bg); }
-    .btn-more {
-      display: flex; align-items: center; gap: 8px;
-      padding: 10px 20px; background: rgba(113,113,113,0.7);
-      color: #fff; font-weight: 600; font-size: .92rem;
-      border: none; border-radius: var(--radius-sm); cursor: pointer;
-      transition: background .15s; backdrop-filter: blur(4px);
-    }
-    .btn-more:hover { background: rgba(113,113,113,0.5); }
+/* Name / meta */
+.ch-info{flex:1;min-width:0}
+.ch-name{
+  font-family:var(--font-display);font-size:1rem;font-weight:700;
+  color:var(--text);margin-bottom:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  letter-spacing:.3px;
+}
+.ch-handle{
+  font-size:.72rem;color:var(--text3);margin-bottom:8px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ch-status-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ch-badge-live{
+  display:none;align-items:center;gap:4px;
+  padding:3px 9px;border-radius:4px;
+  background:rgba(229,9,20,.15);border:1px solid rgba(229,9,20,.3);
+  font-size:.62rem;font-weight:700;letter-spacing:1px;color:var(--red);
+}
+.ch-card.is-live .ch-badge-live{display:flex}
+.ch-badge-live .dot{width:5px;height:5px;background:var(--red);border-radius:50%;animation:blink 1.4s infinite}
 
-    /* ═══ CONTENT SECTIONS ═══ */
-    .section { padding: 0 16px 40px; }
+/* Stats row */
+.ch-stats{
+  display:flex;gap:0;border-top:1px solid var(--border);
+  margin-top:14px;
+}
+.ch-stat{
+  flex:1;padding:12px 10px;text-align:center;
+  border-right:1px solid var(--border);
+}
+.ch-stat:last-child{border-right:none}
+.ch-stat-val{
+  font-family:var(--font-display);font-size:.95rem;font-weight:700;
+  color:var(--text);letter-spacing:.5px;line-height:1.1;
+  margin-bottom:2px;
+}
+.ch-stat-lbl{font-size:.6rem;font-weight:500;color:var(--text3);letter-spacing:.8px;text-transform:uppercase}
 
-    .section-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 16px;
-    }
-    .section-title {
-      font-size: 1.1rem; font-weight: 700; color: var(--text);
-      display: flex; align-items: center; gap: 10px;
-    }
-    .section-title .live-badge-sm {
-      background: var(--red); color: #fff; font-size: .62rem;
-      font-weight: 700; letter-spacing: 1px; padding: 2px 7px;
-      border-radius: 2px; text-transform: uppercase;
-    }
-    .section-count {
-      font-size: .82rem; color: var(--text3); font-weight: 500;
-    }
+/* Loading shimmer */
+.ch-card.loading .ch-avatar{background:var(--bg4)}
+.shimmer{
+  background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;
+  border-radius:4px;
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-    /* ═══ STREAM GRID (YouTube style) ═══ */
-    .stream-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px 14px;
-    }
+/* Card footer actions */
+.ch-actions{
+  display:flex;gap:8px;padding:0 20px 16px;
+}
+.btn-ch-watch{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:9px;border-radius:var(--r-xs);border:none;
+  background:var(--red);color:#fff;font-family:var(--font);
+  font-size:.78rem;font-weight:600;cursor:pointer;
+  transition:background .15s;
+}
+.btn-ch-watch:hover{background:var(--red-dk)}
+.btn-ch-yt{
+  width:38px;height:38px;display:flex;align-items:center;justify-content:center;
+  border-radius:var(--r-xs);border:1px solid var(--border);
+  background:var(--chip);color:var(--text2);cursor:pointer;
+  transition:all .15s;flex-shrink:0;
+}
+.btn-ch-yt:hover{border-color:var(--red);color:var(--red);background:rgba(229,9,20,.08)}
 
-    .stream-card {
-      cursor: pointer; transition: transform .2s ease;
-    }
-    .stream-card:hover { transform: translateY(-2px); }
-    .stream-card:hover .stream-thumb iframe { opacity: 0.9; }
+/* Empty state */
+.empty-state{
+  grid-column:1/-1;padding:60px 20px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+}
+.empty-icon{font-size:3rem;opacity:.3}
+.empty-txt{font-size:.88rem;color:var(--text2)}
 
-    .stream-thumb {
-      position: relative; width: 100%; aspect-ratio: 16/9;
-      background: var(--bg3); border-radius: var(--radius); overflow: hidden;
-    }
-    .stream-thumb iframe {
-      position: absolute; inset: 0; width: 100%; height: 100%; border: 0;
-      transition: opacity .2s;
-    }
-    .stream-play-overlay {
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0); transition: background .2s;
-      opacity: 0;
-    }
-    .stream-card:hover .stream-play-overlay { opacity: 1; background: rgba(0,0,0,0.3); }
-    .play-circle {
-      width: 52px; height: 52px; border-radius: 50%;
-      background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
-      display: flex; align-items: center; justify-content: center;
-      transform: scale(0.8); transition: transform .2s;
-    }
-    .stream-card:hover .play-circle { transform: scale(1); }
+/* ─── CHANNEL BAR (bottom) ─── */
+.channel-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:600;
+  height:var(--bar-h);background:var(--bg2);
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:0;
+}
+.bar-brand{
+  flex-shrink:0;padding:0 20px;display:flex;flex-direction:column;
+  align-items:flex-start;justify-content:center;height:100%;
+  border-right:1px solid var(--border);
+}
+.bar-brand-top{font-family:var(--font-display);font-size:.85rem;font-weight:800;letter-spacing:2px;color:var(--red)}
+.bar-brand-sub{font-size:.6rem;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:1px}
+.bar-scroll{flex:1;overflow-x:auto;display:flex;align-items:center;gap:10px;padding:0 16px;scrollbar-width:none}
+.bar-scroll::-webkit-scrollbar{display:none}
+.bar-chip{
+  flex-shrink:0;display:flex;align-items:center;gap:8px;
+  padding:7px 14px 7px 7px;border-radius:40px;
+  border:1px solid var(--border);background:var(--chip);
+  cursor:pointer;transition:all .15s;
+}
+.bar-chip:hover{background:var(--chip-hv);border-color:rgba(229,9,20,.3)}
+.bar-chip.active{background:rgba(229,9,20,.12);border-color:rgba(229,9,20,.4)}
+.bar-chip-av{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--bg4);overflow:hidden;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.bar-chip-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.bar-chip-av .init{font-family:var(--font-display);font-size:.65rem;font-weight:800;color:var(--red)}
+.bar-chip-name{font-size:.72rem;font-weight:600;color:var(--text);white-space:nowrap}
+.bar-chip-dot{width:6px;height:6px;border-radius:50%;background:var(--text4);flex-shrink:0;transition:background .2s}
+.bar-chip.is-live .bar-chip-dot{background:var(--green);box-shadow:0 0 6px rgba(0,230,118,.6)}
 
-    .stream-live-tag {
-      position: absolute; top: 8px; left: 8px;
-      background: var(--red); color: #fff; font-size: .62rem;
-      font-weight: 700; letter-spacing: .5px; padding: 2px 6px;
-      border-radius: 2px; text-transform: uppercase;
-      display: none; /* hidden by default, shown only when confirmed live */
-    }
-    .stream-card.is-live .stream-live-tag { display: block; }
+/* ─── PLAYER MODAL ─── */
+.player-modal{
+  position:fixed;inset:0;z-index:2000;
+  background:rgba(0,0,0,.88);backdrop-filter:blur(14px);
+  display:none;align-items:center;justify-content:center;
+  padding:24px;
+}
+.player-modal.open{display:flex}
+.player-inner{
+  width:min(900px,100%);background:var(--bg2);
+  border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;animation:popIn .22s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 32px 100px rgba(0,0,0,.8);
+}
+.player-video{position:relative;aspect-ratio:16/9;background:#000}
+.player-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.player-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;border-top:1px solid var(--border);
+  background:var(--bg2);gap:12px;
+}
+.player-ch-name{font-family:var(--font-display);font-size:1.1rem;font-weight:700;letter-spacing:2px;color:var(--text)}
+.player-close{
+  width:34px;height:34px;background:var(--bg3);
+  border:1px solid var(--border);border-radius:50%;
+  color:var(--text);font-size:1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.player-close:hover{background:var(--red);border-color:var(--red);color:#fff}
+@keyframes popIn{from{transform:translateY(16px) scale(.97);opacity:0}to{transform:none;opacity:1}}
 
-    /* Card info — YT style */
-    .stream-card-info {
-      display: flex; gap: 10px; padding: 10px 0 4px;
-    }
-    .stream-avatar {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--red) 0%, #ff6b35 100%);
-      display: flex; align-items: center; justify-content: center;
-      font-size: .7rem; font-weight: 800; color: #fff; flex-shrink: 0;
-    }
-    .stream-meta { flex: 1; min-width: 0; }
-    .stream-name {
-      font-size: .9rem; font-weight: 600; color: var(--text);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      margin-bottom: 3px; line-height: 1.3;
-    }
-    .stream-sub { font-size: .78rem; color: var(--text2); line-height: 1.4; }
-    .stream-sub span { display: block; }
+/* ─── ADMIN OVERLAY BASE ─── */
+.overlay{
+  position:fixed;inset:0;z-index:3000;
+  background:rgba(0,0,0,.88);backdrop-filter:blur(12px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.overlay.open{display:flex}
 
-    /* ═══ CHANNEL BAR (horizontal scroll) ═══ */
-    .channel-bar {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      height: 68px; z-index: 800;
-      background: var(--bg); border-top: 1px solid var(--border2);
-      display: flex; align-items: center;
-      padding: 0 16px; gap: 10px;
-    }
-    .bar-label {
-      flex-shrink: 0; display: flex; flex-direction: column; gap: 2px;
-    }
-    .bar-label-top {
-      font-family: var(--font-display); font-size: .9rem;
-      letter-spacing: 2px; color: var(--red);
-    }
-    .bar-label-sub { font-size: .6rem; color: var(--text3); letter-spacing: .5px; text-transform: uppercase; }
-    .bar-divider { width: 1px; height: 36px; background: var(--border); flex-shrink: 0; }
+/* ─── ADMIN LOGIN ─── */
+.admin-box{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:32px;width:min(420px,100%);
+  animation:popIn .22s cubic-bezier(.4,0,.2,1);
+}
+.admin-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.admin-title{
+  font-family:var(--font-display);font-size:1.5rem;font-weight:800;
+  letter-spacing:3px;color:var(--text);
+}
+.admin-title em{color:var(--red);font-style:normal}
+.admin-close{
+  width:30px;height:30px;background:none;border:1px solid var(--border);
+  border-radius:50%;color:var(--text2);font-size:.9rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.admin-close:hover{background:var(--red);border-color:var(--red);color:#fff}
+.admin-field{margin-bottom:14px}
+.admin-lbl{display:block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.admin-input{
+  width:100%;padding:10px 14px;border-radius:var(--r-xs);
+  border:1px solid var(--border);background:var(--bg3);
+  color:var(--text);font-family:var(--font);font-size:.88rem;outline:none;
+  transition:border .2s;
+}
+.admin-input:focus{border-color:rgba(229,9,20,.5)}
+.admin-err{font-size:.76rem;color:#ff5252;margin-top:8px;display:none}
+.btn-submit{
+  width:100%;padding:12px;margin-top:8px;border-radius:var(--r-xs);
+  border:none;background:var(--red);color:#fff;
+  font-family:var(--font);font-size:.9rem;font-weight:600;
+  cursor:pointer;transition:background .15s;
+}
+.btn-submit:hover{background:var(--red-dk)}
 
-    .channel-scroll {
-      display: flex; gap: 8px; overflow-x: auto; flex: 1;
-      scrollbar-width: none; padding: 6px 0; align-items: center;
-    }
-    .channel-scroll::-webkit-scrollbar { display: none; }
+/* ─── ADMIN PANEL ─── */
+.admin-panel{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);width:min(640px,100%);
+  max-height:90vh;display:flex;flex-direction:column;
+  animation:popIn .22s cubic-bezier(.4,0,.2,1);
+  overflow:hidden;
+}
+.admin-panel-hdr{
+  padding:24px 28px 0;flex-shrink:0;
+  border-bottom:1px solid var(--border);
+}
+.admin-tabs{display:flex;gap:0;margin-top:20px}
+.admin-tab{
+  padding:10px 20px;font-size:.78rem;font-weight:600;
+  border:none;background:none;color:var(--text2);
+  cursor:pointer;border-bottom:2px solid transparent;
+  transition:all .15s;font-family:var(--font);
+}
+.admin-tab:hover{color:var(--text)}
+.admin-tab.active{color:var(--red);border-bottom-color:var(--red)}
+.admin-panel-body{flex:1;overflow-y:auto;padding:24px 28px}
+.admin-panel-body::-webkit-scrollbar{width:4px}
+.admin-panel-body::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:2px}
 
-    .ch-badge {
-      display: flex; align-items: center; gap: 7px; flex-shrink: 0;
-      padding: 5px 12px 5px 5px; background: var(--chip-bg);
-      border: 1px solid var(--border); border-radius: 20px;
-      cursor: pointer; transition: all .15s; white-space: nowrap;
-    }
-    .ch-badge:hover { background: var(--chip-hover); border-color: rgba(255,0,0,.35); }
-    .ch-badge.active { background: rgba(255,0,0,.15); border-color: var(--red); }
-    .ch-avatar {
-      width: 24px; height: 24px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--red), #ff6b35);
-      display: flex; align-items: center; justify-content: center;
-      font-size: .55rem; font-weight: 800; color: #fff; flex-shrink: 0;
-    }
-    .ch-name { font-size: .78rem; font-weight: 500; color: var(--text2); }
-    .ch-badge.active .ch-name { color: var(--red); }
-    .ch-online { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; animation: blink 2s infinite; display: none; }
-    .ch-online.is-live { display: block; }
+/* Tab content */
+.tab-content{display:none}
+.tab-content.active{display:block}
 
-    /* ═══ DONATE BAR (thin strip at bottom above channel bar) ═══ */
-    .donate-strip {
-      position: fixed; bottom: 68px; left: 0; right: 0;
-      z-index: 790; height: 48px;
-      background: var(--bg2); border-top: 1px solid rgba(255,214,0,0.2);
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 24px; gap: 12px;
-    }
-    .donate-strip-left { display: flex; align-items: center; gap: 10px; }
-    .donate-strip-text { font-size: .78rem; color: var(--text2); }
-    .donate-strip-text strong { color: var(--gold); }
-    .btn-donate-strip {
-      display: flex; align-items: center; gap: 6px;
-      padding: 7px 16px;
-      background: linear-gradient(135deg, #ffd600, #f9a825);
-      color: #000; font-weight: 700; font-size: .78rem;
-      border: none; border-radius: 20px; cursor: pointer;
-      box-shadow: 0 2px 12px rgba(255,214,0,.25);
-      transition: transform .15s, box-shadow .15s;
-    }
-    .btn-donate-strip:hover { transform: scale(1.04); box-shadow: 0 4px 18px rgba(255,214,0,.4); }
+/* Section label */
+.sec-label{font-size:.65rem;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;color:var(--text3);margin-bottom:12px}
 
-    /* ═══ PLAYER MODAL ═══ */
-    .player-modal {
-      position: fixed; inset: 0; z-index: 2000;
-      background: var(--overlay); backdrop-filter: blur(16px);
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none; transition: opacity .25s;
-    }
-    .player-modal.open { opacity: 1; pointer-events: all; }
-    .player-modal-inner {
-      width: min(92vw, 1100px); background: var(--bg2);
-      border-radius: 12px; overflow: hidden;
-      box-shadow: 0 24px 80px rgba(0,0,0,.7);
-      transform: translateY(20px) scale(.97);
-      transition: transform .3s cubic-bezier(.4,0,.2,1);
-    }
-    .player-modal.open .player-modal-inner { transform: translateY(0) scale(1); }
-    .player-modal-video { position: relative; aspect-ratio: 16/9; background: #000; }
-    .player-modal-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-    .player-modal-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 20px; background: var(--bg2);
-      border-top: 1px solid var(--border2);
-    }
-    .modal-ch-name { font-family: var(--font-display); font-size: 1.3rem; letter-spacing: 2px; color: var(--text); }
-    .modal-close-btn {
-      width: 36px; height: 36px; background: var(--bg3);
-      border: 1px solid var(--border); border-radius: 50%;
-      color: var(--text); font-size: 1.2rem;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: all .15s;
-    }
-    .modal-close-btn:hover { background: var(--red); border-color: var(--red); color: #fff; }
+/* Channel list in admin */
+.admin-ch-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;margin-bottom:20px}
+.admin-ch-list::-webkit-scrollbar{width:3px}
+.admin-ch-list::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:2px}
+.admin-ch-item{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-xs);
+}
+.admin-ch-av{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--bg4);overflow:hidden;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.admin-ch-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.admin-ch-av .init{font-family:var(--font-display);font-size:.6rem;font-weight:800;color:var(--red)}
+.admin-ch-name{font-size:.82rem;font-weight:600;color:var(--text);min-width:70px;flex-shrink:0}
+.admin-ch-handle{font-size:.68rem;color:var(--text3);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace}
+.admin-ch-del{
+  width:26px;height:26px;border-radius:4px;border:none;
+  background:rgba(229,9,20,.12);color:var(--red);
+  cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.admin-ch-del:hover{background:var(--red);color:#fff}
+.admin-divider{border:none;border-top:1px solid var(--border);margin:20px 0}
 
-    /* ═══ DONATE MODAL ═══ */
-    .donate-overlay {
-      display: none; position: fixed; inset: 0; z-index: 3000;
-      background: rgba(0,0,0,.88); backdrop-filter: blur(12px);
-      align-items: center; justify-content: center;
-    }
-    .donate-overlay.open { display: flex; }
-    .donate-box {
-      background: var(--bg2); border: 1px solid rgba(255,214,0,.2);
-      border-radius: 16px; padding: 36px 40px;
-      max-width: 420px; width: 90vw; text-align: center;
-      box-shadow: 0 20px 60px rgba(0,0,0,.6);
-      animation: popIn .25s cubic-bezier(.4,0,.2,1);
-    }
-    @keyframes popIn { from { transform: translateY(16px) scale(.97); opacity:0; } to { transform: none; opacity:1; } }
-    .donate-icon { font-size: 2.5rem; margin-bottom: 12px; }
-    .donate-title { font-family: var(--font-display); font-size: 1.8rem; letter-spacing: 2px; color: var(--gold); margin-bottom: 8px; }
-    .donate-desc { font-size: .84rem; color: var(--text2); margin-bottom: 22px; line-height: 1.6; }
-    .donate-links { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-    .donate-link-item {
-      background: var(--bg3); border: 1px solid var(--border);
-      border-radius: 10px; padding: 14px 16px; text-align: left; cursor: pointer;
-      transition: border-color .15s; text-decoration: none; display: block;
-    }
-    .donate-link-item:hover { border-color: var(--gold); }
-    .donate-link-label { font-size: .62rem; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
-    .donate-link-url { font-size: .9rem; font-weight: 600; color: var(--text); }
-    .donate-close-btn {
-      padding: 10px 28px; background: var(--red); color: #fff;
-      border: none; border-radius: 8px; font-weight: 700; font-size: .88rem;
-      cursor: pointer; transition: background .15s;
-    }
-    .donate-close-btn:hover { background: var(--red-dark); }
+/* Add channel row - now with username input */
+.admin-add-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.admin-add-grid .admin-field{margin:0}
+.admin-add-grid2{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+.admin-add-grid2 .admin-field{margin:0}
+.btn-add{
+  padding:10px 18px;border-radius:var(--r-xs);border:none;
+  background:var(--red);color:#fff;font-family:var(--font);
+  font-size:.78rem;font-weight:600;cursor:pointer;
+  height:40px;transition:background .15s;white-space:nowrap;
+}
+.btn-add:hover{background:var(--red-dk)}
 
-    /* ═══ MULTIWATCH OVERLAY ═══ */
-    .multiwatch-overlay {
-      position: fixed; inset: 0; z-index: 1100;
-      background: #000; display: none; flex-direction: column;
-    }
-    .multiwatch-overlay.open { display: flex; }
+/* Custom avatar section */
+.admin-ch-av-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;margin-bottom:16px}
+.admin-av-item{
+  display:grid;grid-template-columns:32px 1fr 1fr auto;align-items:center;
+  gap:10px;padding:8px 12px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-xs);
+}
+.admin-av-item .av-preview{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--bg4);overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.admin-av-item .av-preview img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.admin-av-item .av-name{font-size:.78rem;font-weight:600;color:var(--text)}
+.admin-av-item .av-url-input{
+  width:100%;padding:6px 10px;border-radius:4px;
+  border:1px solid var(--border);background:var(--bg4);
+  color:var(--text);font-family:var(--font);font-size:.72rem;outline:none;
+}
+.admin-av-item .av-url-input:focus{border-color:rgba(229,9,20,.4)}
+.btn-av-save{
+  padding:5px 10px;border-radius:4px;border:none;
+  background:var(--chip);color:var(--text2);font-family:var(--font);
+  font-size:.7rem;font-weight:600;cursor:pointer;
+  transition:all .15s;white-space:nowrap;
+}
+.btn-av-save:hover{background:rgba(229,9,20,.15);color:var(--red)}
 
-    .mw-topbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 8px 16px; background: #0f0f0f;
-      border-bottom: 1px solid rgba(255,255,255,.08); flex-shrink: 0; gap: 10px;
-    }
-    .mw-topbar-left { display: flex; align-items: center; gap: 12px; }
-    .mw-logo {
-      font-family: var(--font-display); font-size: 1.1rem;
-      letter-spacing: 3px; color: var(--red);
-    }
-    .mw-layout-btns { display: flex; gap: 5px; }
-    .mw-layout-btn {
-      padding: 5px 13px; border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06); color: rgba(255,255,255,.5);
-      font-size: .72rem; font-weight: 600; letter-spacing: .5px;
-      border-radius: 20px; cursor: pointer; transition: all .15s;
-    }
-    .mw-layout-btn.active { border-color: var(--red); color: var(--red); background: rgba(255,0,0,.12); }
-    .mw-topbar-right { display: flex; align-items: center; gap: 8px; }
-    .mw-close-btn {
-      padding: 6px 16px; background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.12);
-      color: #fff; font-size: .78rem; font-weight: 600;
-      border-radius: 20px; cursor: pointer; transition: background .15s;
-    }
-    .mw-close-btn:hover { background: rgba(255,255,255,.16); }
+/* Ticker admin */
+.ticker-list{display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;margin-bottom:16px}
+.ticker-item-row{
+  display:flex;align-items:center;gap:8px;padding:8px 12px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-xs);
+}
+.ticker-item-row .t-text{flex:1;font-size:.82rem;color:var(--text)}
+.ticker-item-del{
+  width:24px;height:24px;border-radius:4px;border:none;
+  background:rgba(229,9,20,.1);color:var(--red);
+  cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;flex-shrink:0;
+}
+.ticker-item-del:hover{background:var(--red);color:#fff}
+.ticker-speed-row{display:flex;align-items:center;gap:12px;margin-top:12px}
+.ticker-speed-row label{font-size:.72rem;color:var(--text2);white-space:nowrap}
+input[type=range]{flex:1;accent-color:var(--red)}
 
-    .mw-body { flex: 1; display: flex; overflow: hidden; min-height: 0; }
-    .mw-grid {
-      flex: 1; display: grid; gap: 3px; padding: 3px;
-      overflow: hidden; min-height: 0;
-    }
-    .mw-grid.layout-3 { grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr; }
-    .mw-grid.layout-4 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
-    .mw-grid.layout-6 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
-    .mw-grid.layout-9 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+/* Admin logout btn */
+.btn-logout{
+  width:100%;padding:9px;margin-top:14px;border-radius:var(--r-xs);
+  border:1px solid var(--border);background:transparent;
+  color:var(--text3);font-family:var(--font);font-size:.8rem;
+  cursor:pointer;transition:all .15s;
+}
+.btn-logout:hover{border-color:var(--red);color:var(--red)}
 
-    /* Chat sidebar */
-    .mw-chat-sidebar {
-      width: 0; flex-shrink: 0; background: #0d0d0d;
-      border-left: 1px solid rgba(255,255,255,.08);
-      display: flex; flex-direction: column;
-      overflow: hidden; transition: width .3s ease;
-    }
-    .mw-chat-sidebar.open { width: 340px; }
-    .mw-chat-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.08);
-      flex-shrink: 0; gap: 8px;
-    }
-    .mw-chat-title {
-      font-size: .68rem; font-weight: 700; letter-spacing: 2px;
-      text-transform: uppercase; color: rgba(255,255,255,.5);
-      display: flex; align-items: center; gap: 7px; flex: 1;
-    }
-    .mw-chat-title svg { color: var(--red); flex-shrink: 0; }
-    .btn-yt-login {
-      display: flex; align-items: center; gap: 6px;
-      padding: 5px 10px; background: rgba(255,255,255,.1); color: rgba(255,255,255,.8);
-      font-size: .65rem; font-weight: 700; letter-spacing: .5px;
-      border: 1px solid rgba(255,255,255,.15); border-radius: 20px;
-      cursor: pointer; transition: background .15s; white-space: nowrap;
-    }
-    .btn-yt-login:hover { background: rgba(255,255,255,.18); }
-    .btn-yt-login.logged-in { background: rgba(0,200,83,.15); color: #00c853; border-color: rgba(0,200,83,.3); }
-    .yt-user-avatar { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-    .mw-chat-login-notice {
-      padding: 12px; background: rgba(255,0,0,.07);
-      border-bottom: 1px solid rgba(255,255,255,.06); flex-shrink: 0;
-      display: flex; flex-direction: column; gap: 8px;
-    }
-    .mw-chat-login-notice p { font-size: .72rem; color: rgba(255,255,255,.4); line-height: 1.5; }
-    .mw-chat-login-notice.hidden { display: none; }
-    .mw-chat-tabs {
-      display: flex; gap: 4px; padding: 8px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.06); flex-shrink: 0;
-      overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none;
-    }
-    .mw-chat-tabs::-webkit-scrollbar { display: none; }
-    .mw-chat-tab {
-      padding: 4px 12px; border-radius: 20px; font-size: .68rem;
-      font-weight: 700; letter-spacing: .5px; cursor: pointer;
-      border: 1px solid rgba(255,255,255,.1); background: transparent;
-      color: rgba(255,255,255,.3); white-space: nowrap; flex-shrink: 0;
-      transition: all .15s;
-    }
-    .mw-chat-tab.active { background: rgba(255,0,0,.15); border-color: rgba(255,0,0,.5); color: var(--red); }
-    .mw-chat-frame-wrap { flex: 1; overflow: hidden; min-height: 0; position: relative; }
-    .mw-chat-frame-wrap iframe { width: 100%; height: 100%; border: 0; }
-    .mw-chat-loading {
-      position: absolute; inset: 0; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 12px; background: #0d0d0d;
-    }
-    .mw-chat-loading-spinner {
-      width: 28px; height: 28px; border: 2px solid rgba(255,255,255,.08);
-      border-top-color: var(--red); border-radius: 50%;
-      animation: spin .8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .mw-chat-loading p { font-size: .72rem; color: rgba(255,255,255,.25); letter-spacing: 1px; }
-    .mw-chat-error {
-      position: absolute; inset: 0; display: none; flex-direction: column;
-      align-items: center; justify-content: center; gap: 12px;
-      background: #0d0d0d; padding: 20px; text-align: center;
-    }
-    .mw-chat-error.show { display: flex; }
-    .mw-chat-error-icon { font-size: 2rem; }
-    .mw-chat-error p { font-size: .72rem; color: rgba(255,255,255,.4); line-height: 1.6; }
-    .mw-chat-error small { font-size: .65rem; color: rgba(255,255,255,.2); }
-    .btn-open-chat-popup {
-      padding: 8px 16px; background: var(--red); color: #fff;
-      border: none; border-radius: 8px; font-size: .75rem; font-weight: 700;
-      cursor: pointer; transition: background .15s;
-    }
-    .btn-open-chat-popup:hover { background: var(--red-dark); }
-    .mw-chat-empty {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 10px; color: rgba(255,255,255,.2); padding: 20px; text-align: center; height: 100%;
-    }
-    .mw-chat-empty p { font-size: .78rem; line-height: 1.6; }
-    .btn-toggle-chat {
-      display: flex; align-items: center; gap: 6px;
-      padding: 5px 12px; background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.12); border-radius: 20px;
-      color: rgba(255,255,255,.5); font-size: .72rem; font-weight: 600;
-      cursor: pointer; transition: all .15s;
-    }
-    .btn-toggle-chat:hover { background: rgba(255,255,255,.12); color: #fff; }
-    .btn-toggle-chat.active { background: rgba(255,0,0,.15); border-color: rgba(255,0,0,.5); color: var(--red); }
+/* ─── MULTIWATCH ─── */
+.mw-overlay{
+  position:fixed;inset:0;z-index:1100;
+  background:#000;display:none;flex-direction:column;
+}
+.mw-overlay.open{display:flex}
+.mw-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 16px;background:#0c0c0c;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  flex-shrink:0;gap:10px;
+}
+.mw-bar-l{display:flex;align-items:center;gap:12px}
+.mw-logo{font-family:var(--font-display);font-size:1.05rem;font-weight:800;letter-spacing:3px;color:var(--red)}
+.mw-layout-btns{display:flex;gap:4px}
+.mw-layout-btn{
+  padding:5px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.05);color:rgba(255,255,255,.4);
+  font-size:.68rem;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .15s;
+}
+.mw-layout-btn.active{border-color:var(--red);color:var(--red);background:rgba(229,9,20,.1)}
+.mw-close-btn{
+  padding:5px 14px;border-radius:20px;
+  border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);
+  color:#fff;font-size:.72rem;font-weight:600;cursor:pointer;transition:background .15s;
+}
+.mw-close-btn:hover{background:rgba(255,255,255,.14)}
+.mw-body{flex:1;display:flex;overflow:hidden;min-height:0}
+.mw-grid{flex:1;display:grid;gap:2px;padding:2px;overflow:hidden;min-height:0}
+.mw-grid.layout-3{grid-template-columns:repeat(3,1fr);grid-template-rows:1fr}
+.mw-grid.layout-4{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr)}
+.mw-grid.layout-6{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr)}
+.mw-grid.layout-9{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr)}
+.mw-slot{position:relative;background:#080808;border-radius:2px;display:flex;flex-direction:column;overflow:hidden}
+.mw-slot iframe{width:100%;flex:1;border:0;min-height:0}
+.mw-slot-bar{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#111;flex-shrink:0}
+.mw-slot-name{font-size:.68rem;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.5px}
+.mw-slot-btn{font-size:.65rem;color:var(--red);cursor:pointer;background:none;border:none;padding:2px 6px;font-weight:700}
+.mw-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.mw-empty-ring{
+  width:48px;height:48px;border-radius:50%;
+  border:2px dashed rgba(229,9,20,.25);background:rgba(229,9,20,.06);
+  display:flex;align-items:center;justify-content:center;transition:all .2s;
+}
+.mw-empty:hover .mw-empty-ring{border-color:var(--red);background:rgba(229,9,20,.15)}
+.mw-empty-txt{font-size:.65rem;color:rgba(255,255,255,.18);letter-spacing:1.5px;text-transform:uppercase}
+.mw-picker-overlay{
+  position:fixed;inset:0;z-index:1200;
+  background:rgba(0,0,0,.85);display:none;
+  align-items:center;justify-content:center;
+}
+.mw-picker-overlay.open{display:flex}
+.mw-picker-box{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:20px;width:min(460px,92vw);
+  max-height:72vh;display:flex;flex-direction:column;
+}
+.mw-picker-title{font-family:var(--font-display);font-size:1.1rem;font-weight:700;letter-spacing:2px;color:var(--text);margin-bottom:14px}
+.mw-picker-search{
+  padding:9px 14px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--r-xs);color:var(--text);font-size:.84rem;
+  outline:none;margin-bottom:12px;width:100%;font-family:var(--font);
+}
+.mw-picker-search:focus{border-color:rgba(229,9,20,.4)}
+.mw-picker-list{overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+.mw-picker-item{
+  display:flex;align-items:center;gap:12px;padding:9px 12px;
+  border-radius:var(--r-xs);cursor:pointer;transition:background .15s;
+}
+.mw-picker-item:hover{background:var(--chip)}
+.mw-picker-av{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--bg4);overflow:hidden;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.mw-picker-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.mw-picker-av .init{font-family:var(--font-display);font-size:.68rem;font-weight:800;color:var(--red)}
+.mw-picker-ch-name{font-size:.86rem;font-weight:500;color:var(--text)}
+.mw-picker-cancel{margin-top:14px;padding:8px;text-align:center;cursor:pointer;color:var(--text3);font-size:.76rem;letter-spacing:1px;text-transform:uppercase;transition:color .15s}
+.mw-picker-cancel:hover{color:var(--text2)}
+.btn-multiwatch{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 14px;background:var(--chip);
+  border:1px solid var(--border);border-radius:20px;
+  color:var(--text2);font-size:.74rem;font-weight:600;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.btn-multiwatch:hover{background:var(--chip-hv);color:var(--text)}
 
-    /* MW Slots */
-    .mw-slot {
-      position: relative; background: #0a0a0a;
-      border-radius: 2px; overflow: hidden;
-      display: flex; flex-direction: column;
-    }
-    .mw-slot iframe { width: 100%; flex: 1; border: 0; min-height: 0; }
-    .mw-slot-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 5px 10px; background: #111; flex-shrink: 0;
-    }
-    .mw-slot-name { font-size: .7rem; font-weight: 600; color: rgba(255,255,255,.5); letter-spacing: .5px; }
-    .mw-slot-select {
-      font-size: .68rem; color: var(--red); cursor: pointer;
-      background: none; border: none; padding: 2px 6px; font-weight: 700;
-      transition: color .15s;
-    }
-    .mw-slot-select:hover { color: #fff; }
-    .mw-empty {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 10px; cursor: pointer;
-    }
-    .mw-empty-icon {
-      width: 52px; height: 52px; border-radius: 50%;
-      background: rgba(255,0,0,.08); border: 2px dashed rgba(255,0,0,.25);
-      display: flex; align-items: center; justify-content: center;
-      transition: all .2s;
-    }
-    .mw-empty:hover .mw-empty-icon { background: rgba(255,0,0,.18); border-color: var(--red); }
-    .mw-empty-txt { font-size: .72rem; color: rgba(255,255,255,.2); letter-spacing: 1px; text-transform: uppercase; }
-
-    /* Channel picker */
-    .mw-picker-overlay {
-      position: fixed; inset: 0; z-index: 1200;
-      background: rgba(0,0,0,.88); display: none;
-      align-items: center; justify-content: center;
-    }
-    .mw-picker-overlay.open { display: flex; }
-    .mw-picker-box {
-      background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 12px; padding: 20px; width: min(480px, 92vw);
-      max-height: 72vh; display: flex; flex-direction: column;
-    }
-    .mw-picker-title { font-family: var(--font-display); font-size: 1.15rem; letter-spacing: 2px; color: var(--text); margin-bottom: 14px; }
-    .mw-picker-search {
-      padding: 9px 14px; background: var(--bg3); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text); font-size: .85rem;
-      outline: none; margin-bottom: 12px; width: 100%; font-family: var(--font);
-    }
-    .mw-picker-search:focus { border-color: rgba(255,0,0,.5); }
-    .mw-picker-list { overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
-    .mw-picker-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 9px 12px; border-radius: 8px; cursor: pointer;
-      transition: background .15s;
-    }
-    .mw-picker-item:hover { background: var(--chip-bg); }
-    .mw-picker-avatar {
-      width: 34px; height: 34px; border-radius: 50%; background: var(--red);
-      display: flex; align-items: center; justify-content: center;
-      font-size: .72rem; font-weight: 700; color: #fff; flex-shrink: 0;
-    }
-    .mw-picker-ch-name { font-size: .88rem; font-weight: 500; color: var(--text); }
-    .mw-picker-cancel {
-      margin-top: 14px; padding: 8px; text-align: center; cursor: pointer;
-      color: var(--text3); font-size: .78rem; letter-spacing: 1px;
-      text-transform: uppercase; transition: color .15s;
-    }
-    .mw-picker-cancel:hover { color: var(--text2); }
-
-    /* Status bar */
-    .status-bar {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 16px; background: rgba(255,214,0,.07);
-      border: 1px solid rgba(255,214,0,.18); border-radius: 8px;
-      margin-bottom: 28px;
-    }
-    .status-bar.done { background: rgba(0,200,83,.07); border-color: rgba(0,200,83,.2); }
-    .status-text {
-      display: flex; align-items: center; gap: 8px;
-      font-size: .82rem; font-weight: 500; color: var(--gold);
-    }
-    .status-bar.done .status-text { color: #4ade80; }
-    .spin-icon { animation: spin 1s linear infinite; }
-
-    /* Bottom spacing */
-    .page-bottom-spacer { height: 124px; }
-
-    /* ═══ RESPONSIVE ═══ */
-    @media (max-width: 900px) {
-      .stream-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px 10px; }
-      .hero-content { padding: 0 20px 32px; }
-      .section { padding: 0 12px 32px; }
-    }
-    @media (max-width: 640px) {
-      .nav-center { display: none; }
-      .hero { height: 52vh; }
-      .hero-content { padding: 0 16px 28px; }
-      .hero-badge, .btn-more { display: none; }
-      .stream-grid { grid-template-columns: 1fr 1fr; gap: 12px 8px; }
-      .stream-card-info { padding: 7px 0 2px; }
-      .stream-name { font-size: .82rem; }
-      .stream-sub { font-size: .72rem; }
-      .section { padding: 0 10px 28px; }
-      .donate-strip-text { display: none; }
-      .donate-strip { justify-content: space-between; padding: 0 12px 0 16px; }
-      .mw-chat-sidebar { display: none !important; }
-      .mw-grid.layout-3 { grid-template-columns: 1fr; grid-template-rows: repeat(3, 1fr); }
-      .mw-grid.layout-6 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); }
-      .mw-grid.layout-9 { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 400px) {
-      .stream-grid { grid-template-columns: 1fr; }
-      .channel-bar { height: 60px; }
-      .donate-strip { bottom: 60px; }
-      .page-bottom-spacer { height: 116px; }
-    }
-  </style>
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px){.channel-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
+@media(max-width:640px){
+  .nav-center{display:none}
+  .channel-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .section{padding:16px 14px 0}
+  .intro-strip{padding:16px 14px 0}
+  .filter-row{padding:12px 14px 0}
+  .mw-grid.layout-3{grid-template-columns:1fr;grid-template-rows:repeat(3,1fr)}
+  .admin-add-grid{grid-template-columns:1fr}
+}
+@media(max-width:400px){
+  .channel-grid{grid-template-columns:1fr}
+  .ch-stats{flex-direction:row}
+}
+</style>
 </head>
 <body>
 
-<!-- ══ LOADING ══ -->
+<!-- LOADING -->
 <div class="loading-screen" id="loadingScreen">
-  <div class="loading-logo">
-    <div class="yt-mark">
-      <svg viewBox="0 0 24 24"><path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/></svg>
-    </div>
-    <span class="bfl"> BFL</span><span class="tv"> TV</span>
-  </div>
-  <div class="loader-bar"><div class="loader-fill"></div></div>
-  <div class="loading-sub">Live Streaming</div>
+  <div class="ls-logo"><span class="bfl">BFL</span><span class="tv">TV</span></div>
+  <div class="ls-bar"><div class="ls-fill"></div></div>
+  <div class="ls-sub">Live Streaming Community</div>
 </div>
 
-<!-- ══ NAVBAR ══ -->
-<nav class="navbar" id="navbar">
+<!-- TICKER -->
+<div class="ticker-wrap" id="tickerWrap">
+  <div class="ticker-label">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="white" style="margin-right:6px"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+    INFO
+  </div>
+  <div class="ticker-track">
+    <div class="ticker-inner" id="tickerInner"></div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
   <div class="nav-left">
-    <button class="btn-menu" onclick="toggleSidebar()" aria-label="Menu">
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-    </button>
     <a class="nav-logo" href="#">
-      <div class="yt-mark">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/></svg>
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24"><path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/></svg>
       </div>
-      <span class="nav-logo-text">BFL <span>TV</span></span>
+      <span class="logo-text">BFL<span>TV</span></span>
     </a>
+    <div class="live-chip">
+      <div class="live-dot"></div>
+      <span id="navLiveCount">0</span> LIVE
+    </div>
   </div>
 
   <div class="nav-center">
-    <div class="search-form">
-      <div class="search-input-wrap">
-        <input class="search-input" type="text" placeholder="Cari channel..." id="searchInput" oninput="filterSearch()">
-      </div>
-      <button class="btn-search" aria-label="Cari">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    <div class="search-wrap">
+      <input class="search-input" id="searchInput" placeholder="Cari channel..." oninput="filterChannels()">
+      <button class="btn-search">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       </button>
     </div>
   </div>
 
   <div class="nav-right">
-    <div class="live-pill" id="livePill">
-      <span class="live-dot"></span>
-      <span id="navLiveCount">0</span> Live
-    </div>
     <button class="btn-multiwatch" onclick="openMultiwatch()">
-      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="9" height="7" rx="1"/><rect x="13" y="3" width="9" height="7" rx="1"/><rect x="2" y="14" width="9" height="7" rx="1"/><rect x="13" y="14" width="9" height="7" rx="1"/></svg>
-      MultiWatch
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><rect x="7" y="3" width="1" height="14" fill="currentColor" opacity=".3"/><rect x="14" y="3" width="1" height="14" fill="currentColor" opacity=".3"/><path d="M8 21h8M12 17v4"/></svg>
+      Multi
     </button>
-    <button class="btn-admin" id="btnAdmin" onclick="handleAdminBtn()">⚙ Admin</button>
-    <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme">
-      <svg id="iconDark" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      <svg id="iconLight" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72 1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    <button class="btn-icon" onclick="toggleTheme()" title="Toggle theme">
+      <svg id="iconDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:block"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg id="iconLight" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </button>
+    <button class="btn-admin" onclick="handleAdminBtn()">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Admin
     </button>
   </div>
 </nav>
 
-<!-- ══ PAGE BODY ══ -->
+<!-- MAIN CONTENT -->
 <div class="page-body" id="mainContent" style="display:none">
 
-  <!-- HERO -->
-  <div class="hero" id="heroSection">
-    <div class="hero-video-bg" id="heroWrap"></div>
-    <div class="hero-gradient"></div>
-    <div class="hero-content">
-      <div class="hero-badge">
-        <span class="live-dot"></span>
-        Sedang Live
-      </div>
-      <div class="hero-title" id="heroTitle">BFL TV</div>
-      <div class="hero-sub">BFL TV — Tonton Live Sekarang</div>
-      <div class="hero-btns">
-        <button class="btn-watch" id="heroWatchBtn">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          Tonton
-        </button>
-        <button class="btn-more" id="heroMoreBtn">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
-          Info
-        </button>
-      </div>
+  <!-- INTRO -->
+  <div class="intro-strip">
+    <div class="intro-title">BFL <span>Channels</span></div>
+    <div class="intro-meta">
+      <span class="intro-count" id="totalCountBadge">0 Channel</span>
+      <span class="intro-count live" id="liveCountBadge">0 Live</span>
     </div>
   </div>
 
-  <!-- STATUS BAR -->
-  <div class="section" style="padding-bottom:0">
-    <div class="status-bar" id="statusBar">
-      <div class="status-text" id="statusText">
-        <svg class="spin-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
-        Memeriksa status live channel...
-      </div>
-    </div>
+  <!-- FILTER TABS -->
+  <div class="filter-row">
+    <button class="filter-tab active" data-filter="all" onclick="setFilter('all',this)">Semua</button>
+    <button class="filter-tab" data-filter="live" onclick="setFilter('live',this)">🔴 Live Sekarang</button>
+    <button class="filter-tab" data-filter="offline" onclick="setFilter('offline',this)">Offline</button>
   </div>
 
-  <!-- CHANNELS SECTION -->
-  <div class="section" id="streamSection">
-    <div class="section-header">
-      <div class="section-title">
-        Channel Live
-        <span class="live-badge-sm">Live</span>
-      </div>
-      <div class="section-count" id="liveCountBadge">0 Channel</div>
-    </div>
-    <div class="stream-grid" id="streamGrid"></div>
+  <!-- CHANNEL GRID -->
+  <div class="section">
+    <div class="channel-grid" id="channelGrid"></div>
   </div>
 
-  <div class="page-bottom-spacer"></div>
 </div>
 
-<!-- ══ CHANNEL BAR ══ -->
-<div class="channel-bar" id="channelBar">
-  <div class="bar-label">
-    <div class="bar-label-top">BFL</div>
-    <div class="bar-label-sub">Channels</div>
+<!-- CHANNEL BAR (bottom) -->
+<div class="channel-bar">
+  <div class="bar-brand">
+    <div class="bar-brand-top">BFL</div>
+    <div class="bar-brand-sub">Channels</div>
   </div>
-  <div class="bar-divider"></div>
-  <div class="channel-scroll" id="channelScroll"></div>
+  <div class="bar-scroll" id="barScroll"></div>
 </div>
 
-<!-- ══ DONATE STRIP ══ -->
-<div class="donate-strip">
-  <div class="donate-strip-left">
-    <span>💛</span>
-    <span class="donate-strip-text">Dukung <strong>BFL TV</strong> agar terus berkembang!</span>
-  </div>
-  <button class="btn-donate-strip" onclick="openDonate()">
-    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402C1 3.204 4.069 1 7.07 1a6.5 6.5 0 0 1 4.93 2.065A6.5 6.5 0 0 1 16.93 1C19.931 1 23 3.204 23 7.191c0 4.105-5.37 8.863-11 14.402z"/></svg>
-    Donasi
-  </button>
-</div>
-
-<!-- ══ PLAYER MODAL ══ -->
+<!-- PLAYER MODAL -->
 <div class="player-modal" id="playerModal">
-  <div class="player-modal-inner">
-    <div class="player-modal-video">
-      <iframe id="modalIframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  <div class="player-inner">
+    <div class="player-video">
+      <iframe id="playerIframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
-    <div class="player-modal-bar">
-      <div class="modal-ch-name" id="modalChName">Channel</div>
-      <button class="modal-close-btn" onclick="closeModal()">✕</button>
+    <div class="player-bar">
+      <div class="player-ch-name" id="playerChName">Channel</div>
+      <button class="player-close" onclick="closePlayer()">✕</button>
     </div>
   </div>
 </div>
 
-<!-- ══ DONATE MODAL ══ -->
-<div class="donate-overlay" id="donateModal">
-  <div class="donate-box">
-    <div class="donate-icon">💛</div>
-    <div class="donate-title">Dukung BFL TV</div>
-    <p class="donate-desc">BFL TV dibuat dengan ❤️ oleh <strong>@elvanprmn</strong>.<br>Bantu kami terus berkembang dengan donasi kecil Anda!</p>
-    <div class="donate-links">
-      <a href="https://bagibagi.co/elvanprmn" target="_blank" class="donate-link-item">
-        <div class="donate-link-label">BagiBagi</div>
-        <div class="donate-link-url">bagibagi.co/elvanprmn</div>
-      </a>
+<!-- ADMIN LOGIN -->
+<div class="overlay" id="adminLoginOverlay">
+  <div class="admin-box">
+    <div class="admin-hdr">
+      <div class="admin-title">Admin <em>BFLTV</em></div>
+      <button class="admin-close" onclick="closeAdminLogin()">✕</button>
     </div>
-    <button class="donate-close-btn" onclick="closeDonate()">Tutup</button>
+    <div class="admin-field">
+      <label class="admin-lbl">Username</label>
+      <input class="admin-input" id="alUser" type="text" placeholder="admin" autocomplete="off">
+    </div>
+    <div class="admin-field">
+      <label class="admin-lbl">Password</label>
+      <input class="admin-input" id="alPass" type="password" placeholder="••••••••">
+    </div>
+    <div class="admin-err" id="alErr">Username atau password salah.</div>
+    <button class="btn-submit" id="alSubmit">Masuk</button>
   </div>
 </div>
 
-<!-- ══ MULTIWATCH OVERLAY ══ -->
-<div class="multiwatch-overlay" id="multiwatchOverlay">
-  <div class="mw-topbar">
-    <div class="mw-topbar-left">
-      <div class="mw-logo">BFL TV</div>
+<!-- ADMIN PANEL -->
+<div class="overlay" id="adminPanelOverlay">
+  <div class="admin-panel">
+    <div class="admin-panel-hdr">
+      <div class="admin-hdr" style="margin-bottom:0;padding-bottom:0">
+        <div class="admin-title">Kelola <em>BFL TV</em></div>
+        <button class="admin-close" onclick="closeAdminPanel()">✕</button>
+      </div>
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="switchTab('channels',this)">Channel</button>
+        <button class="admin-tab" onclick="switchTab('avatars',this)">Foto Profil</button>
+        <button class="admin-tab" onclick="switchTab('ticker',this)">Iklan Ticker</button>
+      </div>
+    </div>
+    <div class="admin-panel-body">
+
+      <!-- TAB: CHANNELS -->
+      <div class="tab-content active" id="tab-channels">
+        <div class="sec-label">Channel Aktif (<span id="adminChCount">0</span>)</div>
+        <div class="admin-ch-list" id="adminChList"></div>
+        <hr class="admin-divider" style="margin:0 0 16px">
+        <div class="sec-label">Tambah Channel Baru</div>
+        <p style="font-size:.72rem;color:var(--text3);margin-bottom:12px;line-height:1.6">Masukkan username YouTube (contoh: <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">@namakanal</code> atau <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">namakanal</code>) atau Channel ID langsung.</p>
+        <div class="admin-add-grid">
+          <div class="admin-field">
+            <label class="admin-lbl">Nama Tampilan</label>
+            <input class="admin-input" id="addChName" type="text" placeholder="Nama di web">
+          </div>
+          <div class="admin-field">
+            <label class="admin-lbl">Username / Channel ID</label>
+            <input class="admin-input" id="addChHandle" type="text" placeholder="@username atau UCxxxxx">
+          </div>
+        </div>
+        <div class="admin-add-grid2">
+          <div class="admin-field" style="margin:0">
+            <div id="addChStatus" style="font-size:.72rem;color:var(--text3);min-height:18px;margin-top:4px"></div>
+          </div>
+          <button class="btn-add" id="addChBtn">+ Tambah</button>
+        </div>
+        <button class="btn-logout" id="adminLogoutBtn">Keluar dari Admin</button>
+      </div>
+
+      <!-- TAB: AVATARS -->
+      <div class="tab-content" id="tab-avatars">
+        <div class="sec-label">Custom Foto Profil Channel</div>
+        <p style="font-size:.72rem;color:var(--text3);margin-bottom:14px;line-height:1.6">Upload URL foto profil kustom per channel. Jika diisi, foto ini akan menggantikan foto YouTube otomatis.</p>
+        <div class="admin-ch-av-list" id="adminAvList"></div>
+        <p style="font-size:.68rem;color:var(--text3);margin-top:8px">Kosongkan URL untuk menggunakan foto YouTube otomatis.</p>
+      </div>
+
+      <!-- TAB: TICKER -->
+      <div class="tab-content" id="tab-ticker">
+        <div class="sec-label">Teks Iklan Berjalan (<span id="tickerCount">0</span> item)</div>
+        <div class="ticker-list" id="tickerList"></div>
+        <div class="admin-add-grid2" style="margin-top:0">
+          <div class="admin-field" style="margin:0">
+            <input class="admin-input" id="addTickerText" type="text" placeholder="Tulis teks iklan...">
+          </div>
+          <button class="btn-add" id="addTickerBtn">+ Tambah</button>
+        </div>
+        <hr class="admin-divider">
+        <div class="sec-label">Kecepatan Ticker</div>
+        <div class="ticker-speed-row">
+          <label>Lambat</label>
+          <input type="range" id="tickerSpeed" min="10" max="60" value="30">
+          <label>Cepat</label>
+        </div>
+        <div style="font-size:.7rem;color:var(--text3);margin-top:8px;text-align:center" id="tickerSpeedVal">30s (default)</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MULTIWATCH -->
+<div class="mw-overlay" id="mwOverlay">
+  <div class="mw-bar">
+    <div class="mw-bar-l">
+      <div class="mw-logo">BFLTV</div>
       <div class="mw-layout-btns">
         <button class="mw-layout-btn active" id="mwBtn3" onclick="setMwLayout('3')">3</button>
         <button class="mw-layout-btn" id="mwBtn4" onclick="setMwLayout('4')">4</button>
         <button class="mw-layout-btn" id="mwBtn6" onclick="setMwLayout('6')">6</button>
         <button class="mw-layout-btn" id="mwBtn9" onclick="setMwLayout('9')">9</button>
       </div>
-      <button class="btn-toggle-chat" id="btnToggleChat" onclick="toggleChat()">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        Chat
-      </button>
     </div>
-    <div class="mw-topbar-right">
-      <button class="mw-close-btn" onclick="closeMultiwatch()">✕ Tutup</button>
-    </div>
+    <button class="mw-close-btn" onclick="closeMultiwatch()">✕ Tutup</button>
   </div>
-
   <div class="mw-body">
     <div class="mw-grid layout-3" id="mwGrid"></div>
-    <div class="mw-chat-sidebar" id="mwChatSidebar">
-      <div class="mw-chat-header">
-        <div class="mw-chat-title">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          Live Chat
-        </div>
-      </div>
-      <div class="mw-chat-tabs" id="mwChatTabs"></div>
-      <div class="mw-chat-frame-wrap" id="mwChatFrameWrap">
-        <div class="mw-chat-empty" id="mwChatEmpty">
-          <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <p>Pilih channel untuk melihat live chat</p>
-        </div>
-        <div class="mw-chat-error" id="mwChatError">
-          <div class="mw-chat-error-icon">⚠️</div>
-          <p id="mwChatErrorDetail">Tidak dapat memuat chat.</p>
-          <small>YouTube mungkin memblokir embed dari domain ini.</small>
-          <button class="btn-open-chat-popup" onclick="openChatInPopup()">Buka di Popup</button>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 
-<!-- ══ CHANNEL PICKER ══ -->
+<!-- CHANNEL PICKER (multiwatch) -->
 <div class="mw-picker-overlay" id="mwPickerOverlay">
   <div class="mw-picker-box">
     <div class="mw-picker-title">Pilih Channel</div>
-    <input class="mw-picker-search" id="mwPickerSearch" placeholder="Cari channel..." oninput="filterPicker()">
+    <input class="mw-picker-search" id="mwPickerSearch" placeholder="Cari..." oninput="filterPicker()">
     <div class="mw-picker-list" id="mwPickerList"></div>
     <div class="mw-picker-cancel" onclick="closePicker()">Batal</div>
   </div>
 </div>
 
-<!-- ══ ADMIN LOGIN MODAL ══ -->
-<div class="admin-overlay" id="adminLoginOverlay">
-  <div class="admin-box" style="max-width:400px">
-    <div class="admin-header-row">
-      <div class="admin-title">Admin <span>BFL TV</span></div>
-      <button class="admin-close-btn" onclick="closeAdminLogin()">✕</button>
-    </div>
-    <div class="admin-field">
-      <label class="admin-label">Username</label>
-      <input class="admin-input" id="alUser" type="text" placeholder="admin" autocomplete="off">
-    </div>
-    <div class="admin-field">
-      <label class="admin-label">Password</label>
-      <input class="admin-input" id="alPass" type="password" placeholder="••••••••">
-    </div>
-    <div class="admin-err" id="alErr">Username atau password salah.</div>
-    <button class="btn-admin-submit" id="alSubmit">Masuk</button>
-  </div>
-</div>
-
-<!-- ══ ADMIN PANEL MODAL ══ -->
-<div class="admin-overlay" id="adminPanelOverlay">
-  <div class="admin-box">
-    <div class="admin-header-row">
-      <div class="admin-title">Kelola <span>Channel</span></div>
-      <button class="admin-close-btn" onclick="closeAdminPanel()">✕</button>
-    </div>
-    <div class="admin-section-label">Channel Aktif (<span id="adminChCount">0</span>)</div>
-    <div class="admin-ch-list" id="adminChList"></div>
-    <hr class="admin-divider">
-    <div class="admin-section-label">Tambah Channel Baru</div>
-    <div class="admin-add-row">
-      <div class="admin-field">
-        <label class="admin-label">Nama</label>
-        <input class="admin-input" id="addChName" type="text" placeholder="Nama channel">
-      </div>
-      <div class="admin-field">
-        <label class="admin-label">YouTube Channel ID</label>
-        <input class="admin-input" id="addChId" type="text" placeholder="UCxxxxxxxxxxxxxxx">
-      </div>
-      <button class="btn-add-ch" id="addChBtn">+ Tambah</button>
-    </div>
-    <button class="btn-admin-logout" id="adminLogoutBtn">Keluar dari Admin</button>
-  </div>
-</div>
-
 <script>
-/* ════════════════════════════════════════
-   KONFIGURASI CHANNEL
-   ════════════════════════════════════════ */
-const CHANNELS = [
-  { id: "UCCuzDCoI3EUOo_nhCj4noSw", name: "Marapthon"    },
-  { id: "UCJTq8YQXj-2_BNgwis4SGsg", name: "RonnyBons"    },
-  { id: "UCBu6n7CY3k_HdX8THmyEOEw", name: "Abeegel"      },
-  { id: "UCz4s1BgKNXTwOHO0PHQHQxQ", name: "Kafeyinhere"  },
-  { id: "UCgrOxB6ZNPQeWJ1PpIHjXlQ", name: "Johnn"         },
-  { id: "UCZHSRSIP9m2uxOAOlVJGytw", name: "Danny"         },
-  { id: "UCamUqGw_jBciNhBNwBcJFRg", name: "Nathann"       },
-  { id: "UCKciWscgYbPCuAdtX91x06w", name: "Deplonnn"      },
-  { id: "UCvrhggVJsdR6uYvuIrX_Grg", name: "Dipiwww"       },
-  { id: "UCrvlbX01F8qtXlJDXX7czVg", name: "Rey"           },
-  { id: "UCYKxEdT_OBIUv7_zJkyQkdg", name: "AndreMemet"    },
-  { id: "UCQV0qkau8jIHyn5iRY6bIcg", name: "Syacei"        },
-  { id: "UCKN2A4ShReXSHJER9_lfwLw", name: "Bopeng16"      },
-  { id: "UChEzBCVwQg3EC7QjsF3iZHw", name: "Zotafrz"       },
-  { id: "UC-x7sdu_4FNa5fsGDr3nfbQ", name: "Nanzz"         },
-  { id: "UCUC6Ovlo-UNQD5lKcLIn6Q",  name: "Neyna"         },
-  { id: "UCt2QdjyIsTHOVzFlTB37UeA", name: "artszzy"       },
-  { id: "UCb9tHaLY3XFM6V2Is_Z2R6A", name: "Eko D Libra"   },
-  { id: "UCgqC90SQYpod4-Ys-6NVUHw", name: "Edot"          },
-  { id: "UCZyUX_68LnJ-AA6REPU45Ew", name: "Jonanthan"     },
-  { id: "UCPnn55oMeLkr4IF8WTKTdQQ", name: "Sanca"         },
-  { id: "UCSU2OYfJXGQiCULNy0PAk7w", name: "Reggie"        },
-  { id: "UChQbgqNc8MARGDS17qmXiVw", name: "Robbeyu"       },
-  { id: "UCmaXAySgVu7Ptu17PeNCj6w", name: "Samm Kama"     },
-  { id: "UCCBHkKFT-XBsBnzVBrXs5Vw", name: "Paddang"       },
-  { id: "UCxnQ2cffx4Y5TcPkaWcDfLA", name: "JxxxN"         },
-  { id: "UCgqC90SQYpod4-Ys-6NVUHw", name: "Edotsi"        },
-  { id: "UCoxYH2IbvTZFCph-FrMXN4A", name: "Noahh"         },
-  { id: "UC9jZ5Wa13rtmCa7Gi1C94aQ", name: "Dandan"        },
-  { id: "UCEbWxsOYTODhzRaxaSzbzGA", name: "Hlynn"         },
-  { id: "UCdsrkASxJ8QtG55db06789w", name: "Jeffry"        },
-  { id: "UC8qd1G66ZssAsr8bf1rR-ww", name: "Tristan"       },
-  { id: "UC0mPJmfyM0pyysqo____vrg", name: "Nathanidk"     },
-  { id: "UC3QgyfaVyrMrtAWiD-LEznw", name: "Maudy"         },
-  { id: "UCFIVpDe3Va4-zyqU7X1OmyQ", name: "AmeyJune"      },
-  { id: "UCeC4g-1WDyASRbUCR581LcA", name: "BuayaKayang"   },
-  { id: "UCArSnxhpKhVAEsz59qxgUTw", name: "ZaarBot"       },
-  ];
+/* ══════════════════════════════════════
+   CONFIG
+══════════════════════════════════════ */
+const YT_API_KEY = 'AIzaSyDNTU07g3gf6gw3OajwIqVHaq7YMhi49wo';
 
-let activeChId = null;
-let allCards = [];
+const DEFAULT_CHANNELS = [
+  { id:"UCCuzDCoI3EUOo_nhCj4noSw", name:"Marapthon" },
+  { id:"UCJTq8YQXj-2_BNgwis4SGsg", name:"RonnyBons" },
+  { id:"UCBu6n7CY3k_HdX8THmyEOEw", name:"Abeegel" },
+  { id:"UCz4s1BgKNXTwOHO0PHQHQxQ", name:"Kafeyinhere" },
+  { id:"UCgrOxB6ZNPQeWJ1PpIHjXlQ", name:"Johnn" },
+  { id:"UCZHSRSIP9m2uxOAOlVJGytw", name:"Danny" },
+  { id:"UCamUqGw_jBciNhBNwBcJFRg", name:"Nathann" },
+  { id:"UCKciWscgYbPCuAdtX91x06w", name:"Deplonnn" },
+  { id:"UCvrhggVJsdR6uYvuIrX_Grg", name:"Dipiwww" },
+  { id:"UCrvlbX01F8qtXlJDXX7czVg", name:"Rey" },
+  { id:"UCYKxEdT_OBIUv7_zJkyQkdg", name:"AndreMemet" },
+  { id:"UCQV0qkau8jIHyn5iRY6bIcg", name:"Syacei" },
+  { id:"UCKN2A4ShReXSHJER9_lfwLw", name:"Bopeng16" },
+  { id:"UChEzBCVwQg3EC7QjsF3iZHw", name:"Zotafrz" },
+  { id:"UC-x7sdu_4FNa5fsGDr3nfbQ", name:"Nanzz" },
+  { id:"UCUC6Ovlo-UNQD5lKcLIn6Q",  name:"Neyna" },
+  { id:"UCt2QdjyIsTHOVzFlTB37UeA", name:"artszzy" },
+  { id:"UCb9tHaLY3XFM6V2Is_Z2R6A", name:"Eko D Libra" },
+  { id:"UCgqC90SQYpod4-Ys-6NVUHw", name:"Edot" },
+  { id:"UCZyUX_68LnJ-AA6REPU45Ew", name:"Jonanthan" },
+  { id:"UCPnn55oMeLkr4IF8WTKTdQQ", name:"Sanca" },
+  { id:"UCSU2OYfJXGQiCULNy0PAk7w", name:"Reggie" },
+  { id:"UChQbgqNc8MARGDS17qmXiVw", name:"Robbeyu" },
+  { id:"UCmaXAySgVu7Ptu17PeNCj6w", name:"Samm Kama" },
+  { id:"UCCBHkKFT-XBsBnzVBrXs5Vw", name:"Paddang" },
+  { id:"UCxnQ2cffx4Y5TcPkaWcDfLA", name:"JxxxN" },
+  { id:"UCoxYH2IbvTZFCph-FrMXN4A", name:"Noahh" },
+  { id:"UC9jZ5Wa13rtmCa7Gi1C94aQ", name:"Dandan" },
+  { id:"UCEbWxsOYTODhzRaxaSzbzGA", name:"Hlynn" },
+  { id:"UCdsrkASxJ8QtG55db06789w", name:"Jeffry" },
+  { id:"UC8qd1G66ZssAsr8bf1rR-ww", name:"Tristan" },
+  { id:"UC0mPJmfyM0pyysqo____vrg", name:"Nathanidk" },
+  { id:"UC3QgyfaVyrMrtAWiD-LEznw", name:"Maudy" },
+  { id:"UCFIVpDe3Va4-zyqU7X1OmyQ", name:"AmeyJune" },
+  { id:"UCeC4g-1WDyASRbUCR581LcA", name:"BuayaKayang" },
+  { id:"UCArSnxhpKhVAEsz59qxgUTw", name:"ZaarBot" },
+];
 
-/* ── THEME ── */
-(function() {
-  const hour = new Date().getHours();
-  const autoDark = hour < 6 || hour >= 18;
-  const saved = localStorage.getItem('bfltv_theme');
-  const theme = saved || (autoDark ? 'dark' : 'light');
-  document.documentElement.setAttribute('data-theme', theme);
-  updateThemeIcon(theme);
-})();
+const DEFAULT_TICKER = [
+  "Selamat datang di BFL TV! Tonton live streaming favoritmu di sini.",
+  "Follow semua channel BFL di YouTube untuk update terbaru!",
+  "BFL TV — Platform streaming resmi komunitas BFL.",
+  "Dukung streamer BFL dengan subscribe dan nyalakan notifikasi!",
+];
 
-function toggleTheme() {
-  const cur = document.documentElement.getAttribute('data-theme');
-  const next = cur === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('bfltv_theme', next);
-  updateThemeIcon(next);
-}
-function updateThemeIcon(theme) {
-  const d = document.getElementById('iconDark');
-  const l = document.getElementById('iconLight');
-  if (!d || !l) return;
-  if (theme === 'dark') { d.style.display = 'block'; l.style.display = 'none'; }
-  else { d.style.display = 'none'; l.style.display = 'block'; }
-}
-
-/* ── SEARCH FILTER ── */
-function filterSearch() {
-  const query = document.getElementById('searchInput').value.toLowerCase();
-  allCards.forEach(({ card, ch }) => {
-    card.style.display = ch.name.toLowerCase().includes(query) ? '' : 'none';
-  });
-}
-
-/* ── RENDER ALL CHANNELS ── */
-function renderAll() {
-  const grid   = document.getElementById('streamGrid');
-  const scroll = document.getElementById('channelScroll');
-  grid.innerHTML   = '';
-  scroll.innerHTML = '';
-  allCards = [];
-
-  CHANNELS.forEach(ch => {
-    const embedSrc = `https://www.youtube.com/embed/live_stream?channel=${ch.id}&autoplay=0&mute=1&controls=1`;
-    const init = ch.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
-
-    // ── CARD (YouTube-style) ──
-    const card = document.createElement('div');
-    card.className  = 'stream-card';
-    card.dataset.id = ch.id;
-    card.innerHTML  = `
-      <div class="stream-thumb">
-        <iframe src="${embedSrc}" loading="lazy"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen></iframe>
-        <div class="stream-live-tag">Live</div>
-        <div class="stream-play-overlay">
-          <div class="play-circle">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="black"><path d="M8 5v14l11-7z"/></svg>
-          </div>
-        </div>
-      </div>
-      <div class="stream-card-info">
-        <div class="stream-avatar">${esc(init)}</div>
-        <div class="stream-meta">
-          <div class="stream-name">${esc(ch.name)}</div>
-          <div class="stream-sub">
-            <span>YouTube Live</span>
-            <span>BFL TV</span>
-          </div>
-        </div>
-      </div>`;
-    card.addEventListener('click', () => openModal(ch));
-    grid.appendChild(card);
-    allCards.push({ card, ch });
-
-    // ── BADGE (channel bar) ──
-    const badge = document.createElement('div');
-    badge.className  = 'ch-badge';
-    badge.dataset.id = ch.id;
-    badge.innerHTML  = `
-      <div class="ch-avatar">${esc(init)}</div>
-      <span class="ch-name">${esc(ch.name)}</span>
-      <span class="ch-online" id="online-${ch.id}"></span>`;
-    badge.addEventListener('click', () => {
-      activeChId = ch.id;
-      document.querySelectorAll('.ch-badge').forEach(b =>
-        b.classList.toggle('active', b.dataset.id === ch.id));
-      openModal(ch);
-    });
-    scroll.appendChild(badge);
-  });
-
-  document.getElementById('liveCountBadge').textContent = `0 Live`;
-  document.getElementById('navLiveCount').textContent   = 0;
-
-  setHero(CHANNELS[0]);
-
-  // Start live detection for all cards
-  requestAnimationFrame(() => detectLiveAll());
-}
-
-/* ── HERO ── */
-function setHero(ch) {
-  document.getElementById('heroWrap').innerHTML =
-    `<iframe src="https://www.youtube.com/embed/live_stream?channel=${ch.id}&autoplay=1&mute=1&controls=0"
-       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-       allowfullscreen></iframe>`;
-  document.getElementById('heroTitle').textContent = ch.name;
-  document.getElementById('heroWatchBtn').onclick  = () => openModal(ch);
-  document.getElementById('heroMoreBtn').onclick   = () => {
-    document.getElementById('streamSection').scrollIntoView({ behavior: 'smooth' });
-  };
-}
-
-/* ── STATUS ── */
-function updateStatus(msg, done = false) {
-  const bar  = document.getElementById('statusBar');
-  const text = document.getElementById('statusText');
-  if (done) {
-    bar.classList.add('done');
-    text.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> ${msg}`;
-    setTimeout(() => { bar.style.display = 'none'; }, 3000);
-  } else {
-    text.innerHTML = `<svg class="spin-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> ${msg}`;
-  }
-}
-
-/* ── MODAL PLAYER ── */
-function openModal(ch) {
-  activeChId = ch.id;
-  document.querySelectorAll('.ch-badge').forEach(b =>
-    b.classList.toggle('active', b.dataset.id === ch.id));
-  document.getElementById('modalIframe').src =
-    `https://www.youtube.com/embed/live_stream?channel=${ch.id}&autoplay=1&mute=0&controls=1`;
-  document.getElementById('modalChName').textContent = ch.name;
-  document.getElementById('playerModal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeModal() {
-  document.getElementById('playerModal').classList.remove('open');
-  setTimeout(() => { document.getElementById('modalIframe').src = ''; }, 300);
-  document.body.style.overflow = '';
-  activeChId = null;
-  document.querySelectorAll('.ch-badge').forEach(b => b.classList.remove('active'));
-}
-document.getElementById('playerModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('playerModal')) closeModal();
-});
-
-/* ── DONATE ── */
-function openDonate()  { document.getElementById('donateModal').classList.add('open'); }
-function closeDonate() { document.getElementById('donateModal').classList.remove('open'); }
-document.getElementById('donateModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('donateModal')) closeDonate();
-});
-
-/* ── NAVBAR SCROLL ── */
-window.addEventListener('scroll', () => {
-  const nb = document.getElementById('navbar');
-  nb.style.boxShadow = window.scrollY > 10
-    ? '0 2px 8px var(--shadow)' : 'none';
-});
-
-/* ── ESC KEY ── */
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal(); closeDonate(); closeMultiwatch(); }
-});
-
-function esc(str) {
-  const d = document.createElement('div'); d.textContent = str; return d.innerHTML;
-}
-
-/* ── LIVE DETECTION ── */
-const liveChannels = new Set();
-
-function detectLiveAll() {
-  CHANNELS.forEach(ch => {
-    const card = document.querySelector(`.stream-card[data-id="${ch.id}"]`);
-    if (!card) return;
-    const iframe = card.querySelector('iframe');
-    if (!iframe) return;
-
-    iframe.addEventListener('load', function onLoad() {
-      let isLive = false;
-      try {
-        // Cross-origin: if no error thrown, page loaded = assume live
-        const doc = iframe.contentDocument;
-        isLive = !!(doc && doc.readyState !== 'loading');
-      } catch {
-        // cross-origin block = page loaded successfully = live
-        isLive = true;
-      }
-      if (isLive) {
-        liveChannels.add(ch.id);
-      } else {
-        liveChannels.delete(ch.id);
-      }
-      updateLiveUI(ch.id, isLive);
-    }, { once: false });
-
-    iframe.addEventListener('error', function() {
-      liveChannels.delete(ch.id);
-      updateLiveUI(ch.id, false);
-    });
-  });
-}
-
-function updateLiveUI(chId, isLive) {
-  // Card badge
-  const card = document.querySelector(`.stream-card[data-id="${chId}"]`);
-  if (card) {
-    if (isLive) card.classList.add('is-live');
-    else card.classList.remove('is-live');
-  }
-  // Channel bar dot
-  const dot = document.getElementById(`online-${chId}`);
-  if (dot) {
-    if (isLive) dot.classList.add('is-live');
-    else dot.classList.remove('is-live');
-  }
-  // Update counter
-  const total = liveChannels.size;
-  document.getElementById('navLiveCount').textContent = total;
-  document.getElementById('liveCountBadge').textContent = `${total} Live`;
-}
-
-/* ── ADMIN SYSTEM ── */
+let CHANNELS = [];
+let channelData = {}; // cache YT API data: { [id]: { thumb, subs, videoCount, title } }
+let customAvatars = {}; // { [id]: url }
+let tickerItems = [];
+let liveSet = new Set();
+let currentFilter = 'all';
+let isAdmin = false;
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'permana123A';
-let isAdmin = false;
 
-function loadChannels() {
-  const saved = localStorage.getItem('bfltv_channels');
-  if (saved) {
-    try {
-      const arr = JSON.parse(saved);
-      if (Array.isArray(arr) && arr.length > 0) {
-        CHANNELS.length = 0;
-        arr.forEach(c => CHANNELS.push(c));
-      }
-    } catch(e) {}
+/* ── HELPERS ── */
+function esc(s){ const d=document.createElement('div');d.textContent=s;return d.innerHTML }
+function fmtNum(n){
+  if(!n||isNaN(n))return '—';
+  n=parseInt(n);
+  if(n>=1e9) return (n/1e9).toFixed(1)+'B';
+  if(n>=1e6) return (n/1e6).toFixed(1)+'M';
+  if(n>=1e3) return (n/1e3).toFixed(0)+'K';
+  return n.toString();
+}
+function initials(name){ return name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase() }
+
+/* ── THEME ── */
+(function(){
+  const h=new Date().getHours();
+  const auto=h<6||h>=18;
+  const saved=localStorage.getItem('bfltv_theme');
+  const t=saved||(auto?'dark':'light');
+  document.documentElement.setAttribute('data-theme',t);
+  updateThemeIcon(t);
+})();
+function toggleTheme(){
+  const cur=document.documentElement.getAttribute('data-theme');
+  const next=cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  localStorage.setItem('bfltv_theme',next);
+  updateThemeIcon(next);
+}
+function updateThemeIcon(t){
+  document.getElementById('iconDark').style.display=t==='dark'?'block':'none';
+  document.getElementById('iconLight').style.display=t==='light'?'block':'none';
+}
+
+/* ── PERSIST ── */
+function loadData(){
+  try{
+    const ch=localStorage.getItem('bfltv_channels');
+    if(ch){const a=JSON.parse(ch);if(Array.isArray(a)&&a.length>0){CHANNELS.length=0;a.forEach(c=>CHANNELS.push(c));return}}
+  }catch(e){}
+  CHANNELS.length=0;DEFAULT_CHANNELS.forEach(c=>CHANNELS.push(c));
+}
+function saveChannels(){ localStorage.setItem('bfltv_channels',JSON.stringify(CHANNELS)) }
+
+function loadTicker(){
+  try{
+    const t=localStorage.getItem('bfltv_ticker');
+    if(t){const a=JSON.parse(t);if(Array.isArray(a)&&a.length>0){tickerItems=a;return}}
+  }catch(e){}
+  tickerItems=[...DEFAULT_TICKER];
+}
+function saveTicker(){ localStorage.setItem('bfltv_ticker',JSON.stringify(tickerItems)) }
+
+function loadCustomAvatars(){
+  try{
+    const a=localStorage.getItem('bfltv_avatars');
+    if(a)customAvatars=JSON.parse(a)||{};
+  }catch(e){}
+}
+function saveCustomAvatars(){ localStorage.setItem('bfltv_avatars',JSON.stringify(customAvatars)) }
+
+/* ── TICKER RENDER ── */
+function renderTicker(){
+  const inner=document.getElementById('tickerInner');
+  if(!tickerItems.length){
+    inner.innerHTML='<span class="ticker-item">BFL TV — Live Streaming</span>';
+    return;
+  }
+  // Duplicate for seamless loop
+  const items=[...tickerItems,...tickerItems];
+  inner.innerHTML=items.map(t=>`<span class="ticker-item">${esc(t)}</span>`).join('');
+  // Apply speed
+  const spd=parseInt(localStorage.getItem('bfltv_ticker_speed')||'30');
+  inner.style.animationDuration=spd+'s';
+}
+function updateTickerSpeed(val){
+  localStorage.setItem('bfltv_ticker_speed',val);
+  document.getElementById('tickerSpeedVal').textContent=val+'s';
+  document.getElementById('tickerInner').style.animationDuration=val+'s';
+}
+
+/* ── YOUTUBE API ── */
+const ytCache = {};
+async function fetchYTData(channelId){
+  if(ytCache[channelId]) return ytCache[channelId];
+  try{
+    const url=`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelId}&key=${YT_API_KEY}`;
+    const res=await fetch(url);
+    const data=await res.json();
+    if(data.items&&data.items[0]){
+      const item=data.items[0];
+      const result={
+        thumb: item.snippet?.thumbnails?.medium?.url || item.snippet?.thumbnails?.default?.url || '',
+        subs: item.statistics?.subscriberCount||0,
+        videoCount: item.statistics?.videoCount||0,
+        viewCount: item.statistics?.viewCount||0,
+        title: item.snippet?.title||'',
+        handle: item.snippet?.customUrl||''
+      };
+      ytCache[channelId]=result;
+      return result;
+    }
+  }catch(e){}
+  return null;
+}
+
+// Resolve username/handle → channel ID
+async function resolveChannelId(input){
+  input=input.trim();
+  // If already looks like a channel ID (UCxxxx)
+  if(input.startsWith('UC')&&input.length>20) return input;
+  // Strip @ if present
+  const handle=input.startsWith('@')?input:('@'+input);
+  try{
+    const url=`https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${encodeURIComponent(handle)}&key=${YT_API_KEY}`;
+    const res=await fetch(url);
+    const data=await res.json();
+    if(data.items&&data.items[0]) return data.items[0].id;
+  }catch(e){}
+  // Try forUsername (legacy)
+  try{
+    const url=`https://www.googleapis.com/youtube/v3/channels?part=id&forUsername=${encodeURIComponent(input.replace('@',''))}&key=${YT_API_KEY}`;
+    const res=await fetch(url);
+    const data=await res.json();
+    if(data.items&&data.items[0]) return data.items[0].id;
+  }catch(e){}
+  return null;
+}
+
+/* ── RENDER CHANNEL GRID ── */
+async function renderAll(){
+  const grid=document.getElementById('channelGrid');
+  const bar=document.getElementById('barScroll');
+  grid.innerHTML='';
+  bar.innerHTML='';
+  liveSet.clear();
+
+  document.getElementById('totalCountBadge').textContent=CHANNELS.length+' Channel';
+
+  // Render placeholder cards first, then fill with YT data
+  CHANNELS.forEach(ch=>{
+    const card=createPlaceholderCard(ch);
+    grid.appendChild(card);
+    bar.appendChild(createBarChip(ch));
+  });
+
+  applyFilter();
+
+  // Fetch YT data in parallel batches of 5
+  const batch=5;
+  for(let i=0;i<CHANNELS.length;i+=batch){
+    const slice=CHANNELS.slice(i,i+batch);
+    await Promise.all(slice.map(ch=>enrichCard(ch)));
   }
 }
 
-function saveChannels() {
-  localStorage.setItem('bfltv_channels', JSON.stringify(CHANNELS));
+function createPlaceholderCard(ch){
+  const card=document.createElement('div');
+  card.className='ch-card loading';
+  card.id='ch-card-'+ch.id;
+  card.dataset.id=ch.id;
+  card.innerHTML=`
+    <div class="ch-card-accent"></div>
+    <div class="ch-card-body">
+      <div class="ch-avatar-row">
+        <div class="ch-avatar-wrap">
+          <div class="ch-avatar" id="av-${ch.id}">
+            <div class="ch-avatar-init">${initials(ch.name)}</div>
+          </div>
+          <div class="ch-live-ring"></div>
+          <div class="ch-live-badge">LIVE</div>
+        </div>
+        <div class="ch-info">
+          <div class="ch-name">${esc(ch.name)}</div>
+          <div class="ch-handle shimmer" id="handle-${ch.id}" style="width:80px;height:12px;margin-bottom:8px"></div>
+          <div class="ch-status-row">
+            <div class="ch-badge-live"><span class="dot"></span>LIVE</div>
+          </div>
+        </div>
+      </div>
+      <div class="ch-stats">
+        <div class="ch-stat">
+          <div class="ch-stat-val shimmer" id="subs-${ch.id}" style="width:44px;height:16px;margin:0 auto 2px"></div>
+          <div class="ch-stat-lbl">Subs</div>
+        </div>
+        <div class="ch-stat">
+          <div class="ch-stat-val shimmer" id="vids-${ch.id}" style="width:36px;height:16px;margin:0 auto 2px"></div>
+          <div class="ch-stat-lbl">Video</div>
+        </div>
+        <div class="ch-stat">
+          <div class="ch-stat-val shimmer" id="views-${ch.id}" style="width:44px;height:16px;margin:0 auto 2px"></div>
+          <div class="ch-stat-lbl">Views</div>
+        </div>
+      </div>
+    </div>
+    <div class="ch-actions">
+      <button class="btn-ch-watch" onclick="openPlayer(event,'${ch.id}','${esc(ch.name)}')">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        Tonton Live
+      </button>
+      <a class="btn-ch-yt" href="https://youtube.com/channel/${ch.id}" target="_blank" onclick="event.stopPropagation()" title="Buka di YouTube">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/></svg>
+      </a>
+    </div>`;
+  card.addEventListener('click', ()=>openPlayer(null,ch.id,ch.name));
+  return card;
 }
 
-function handleAdminBtn() {
-  if (isAdmin) { openAdminPanel(); }
-  else { openAdminLogin(); }
-}
+async function enrichCard(ch){
+  const ytData=await fetchYTData(ch.id);
+  const card=document.getElementById('ch-card-'+ch.id);
+  if(!card) return;
 
-function openAdminLogin() {
-  document.getElementById('adminLoginOverlay').classList.add('open');
-}
-function closeAdminLogin() {
-  document.getElementById('adminLoginOverlay').classList.remove('open');
-  document.getElementById('alUser').value = '';
-  document.getElementById('alPass').value = '';
-  document.getElementById('alErr').style.display = 'none';
-}
-document.getElementById('alSubmit').onclick = () => {
-  const u = document.getElementById('alUser').value.trim();
-  const p = document.getElementById('alPass').value;
-  if (u === ADMIN_USER && p === ADMIN_PASS) {
-    isAdmin = true;
-    closeAdminLogin();
-    openAdminPanel();
+  card.classList.remove('loading');
+
+  // Avatar
+  const avEl=document.getElementById('av-'+ch.id);
+  const customUrl=customAvatars[ch.id];
+  const thumbUrl=customUrl||(ytData?.thumb)||'';
+  if(thumbUrl){
+    avEl.innerHTML=`<img src="${thumbUrl}" alt="${esc(ch.name)}" onerror="this.parentElement.innerHTML='<div class=\\'ch-avatar-init\\'>${initials(ch.name)}</div>'">`;
+    avEl.classList.add('has-custom');
+  }
+
+  // Handle
+  const handleEl=document.getElementById('handle-'+ch.id);
+  if(handleEl){
+    const handle=ytData?.handle||(ch.username?('@'+ch.username):'');
+    handleEl.className='ch-handle';
+    handleEl.textContent=handle||'YouTube Channel';
+    handleEl.style='';
+  }
+
+  // Stats
+  if(ytData){
+    const subsEl=document.getElementById('subs-'+ch.id);
+    const vidsEl=document.getElementById('vids-'+ch.id);
+    const viewsEl=document.getElementById('views-'+ch.id);
+    if(subsEl){subsEl.className='ch-stat-val';subsEl.style='';subsEl.textContent=fmtNum(ytData.subs)}
+    if(vidsEl){vidsEl.className='ch-stat-val';vidsEl.style='';vidsEl.textContent=fmtNum(ytData.videoCount)}
+    if(viewsEl){viewsEl.className='ch-stat-val';viewsEl.style='';viewsEl.textContent=fmtNum(ytData.viewCount)}
   } else {
-    document.getElementById('alErr').style.display = 'block';
+    ['subs','vids','views'].forEach(k=>{
+      const el=document.getElementById(k+'-'+ch.id);
+      if(el){el.className='ch-stat-val';el.style='';el.textContent='—'}
+    });
   }
-};
-document.getElementById('alPass').onkeydown = e => {
-  if (e.key === 'Enter') document.getElementById('alSubmit').click();
-};
-document.getElementById('adminLoginOverlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('adminLoginOverlay')) closeAdminLogin();
+
+  // Update bar chip avatar too
+  updateBarChipAv(ch.id,thumbUrl);
+}
+
+function createBarChip(ch){
+  const chip=document.createElement('div');
+  chip.className='bar-chip';
+  chip.id='bar-chip-'+ch.id;
+  chip.dataset.id=ch.id;
+  chip.innerHTML=`
+    <div class="bar-chip-av" id="bar-av-${ch.id}"><div class="init">${initials(ch.name)}</div></div>
+    <span class="bar-chip-name">${esc(ch.name)}</span>
+    <span class="bar-chip-dot"></span>`;
+  chip.addEventListener('click',()=>openPlayer(null,ch.id,ch.name));
+  return chip;
+}
+
+function updateBarChipAv(id,url){
+  const el=document.getElementById('bar-av-'+id);
+  if(el&&url) el.innerHTML=`<img src="${url}" alt="" onerror="this.parentElement.innerHTML='<div class=\\\"init\\\">${initials((CHANNELS.find(c=>c.id===id)||{}).name||'')}</div>'">`;
+}
+
+/* ── FILTER ── */
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilter();
+}
+function filterChannels(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('.ch-card').forEach(card=>{
+    const ch=CHANNELS.find(c=>c.id===card.dataset.id);
+    if(!ch) return;
+    const matchQ=ch.name.toLowerCase().includes(q);
+    const matchF=currentFilter==='all'||(currentFilter==='live'&&liveSet.has(ch.id))||(currentFilter==='offline'&&!liveSet.has(ch.id));
+    card.style.display=(matchQ&&matchF)?'':'none';
+  });
+}
+function applyFilter(){
+  document.getElementById('searchInput').value='';
+  document.querySelectorAll('.ch-card').forEach(card=>{
+    const isLive=liveSet.has(card.dataset.id);
+    const show=currentFilter==='all'||(currentFilter==='live'&&isLive)||(currentFilter==='offline'&&!isLive);
+    card.style.display=show?'':'none';
+  });
+}
+
+/* ── LIVE DETECTION via iframe ── */
+function startLiveDetect(){
+  CHANNELS.forEach(ch=>{
+    const iframe=document.createElement('iframe');
+    iframe.style.cssText='display:none;width:0;height:0;position:absolute;opacity:0;pointer-events:none';
+    iframe.src=`https://www.youtube.com/embed/live_stream?channel=${ch.id}&autoplay=0&mute=1`;
+    document.body.appendChild(iframe);
+    iframe.addEventListener('load',()=>{
+      let live=false;
+      try{ const d=iframe.contentDocument; live=!!(d&&d.readyState!=='loading') }
+      catch{ live=true }
+      setLive(ch.id,live);
+    });
+    iframe.addEventListener('error',()=>setLive(ch.id,false));
+  });
+}
+function setLive(id,live){
+  if(live) liveSet.add(id); else liveSet.delete(id);
+  // Card
+  const card=document.getElementById('ch-card-'+id);
+  if(card) card.classList.toggle('is-live',live);
+  // Bar chip
+  const chip=document.getElementById('bar-chip-'+id);
+  if(chip) chip.classList.toggle('is-live',live);
+  // Counts
+  document.getElementById('navLiveCount').textContent=liveSet.size;
+  document.getElementById('liveCountBadge').textContent=liveSet.size+' Live';
+  // Re-apply filter
+  if(currentFilter!=='all') applyFilter();
+}
+
+/* ── PLAYER ── */
+function openPlayer(e,id,name){
+  if(e) e.stopPropagation();
+  document.getElementById('playerIframe').src=`https://www.youtube.com/embed/live_stream?channel=${id}&autoplay=1&mute=0&controls=1`;
+  document.getElementById('playerChName').textContent=name;
+  document.getElementById('playerModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closePlayer(){
+  document.getElementById('playerModal').classList.remove('open');
+  setTimeout(()=>{ document.getElementById('playerIframe').src='' },300);
+  document.body.style.overflow='';
+}
+document.getElementById('playerModal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('playerModal')) closePlayer();
 });
 
-function openAdminPanel() {
-  renderAdminChList();
+/* ── ADMIN ── */
+function handleAdminBtn(){ isAdmin?openAdminPanel():openAdminLogin() }
+
+function openAdminLogin(){ document.getElementById('adminLoginOverlay').classList.add('open') }
+function closeAdminLogin(){
+  document.getElementById('adminLoginOverlay').classList.remove('open');
+  document.getElementById('alUser').value='';
+  document.getElementById('alPass').value='';
+  document.getElementById('alErr').style.display='none';
+}
+document.getElementById('alSubmit').onclick=()=>{
+  const u=document.getElementById('alUser').value.trim();
+  const p=document.getElementById('alPass').value;
+  if(u===ADMIN_USER&&p===ADMIN_PASS){
+    isAdmin=true; closeAdminLogin(); openAdminPanel();
+  } else {
+    document.getElementById('alErr').style.display='block';
+  }
+};
+document.getElementById('alPass').onkeydown=e=>{ if(e.key==='Enter') document.getElementById('alSubmit').click() };
+document.getElementById('adminLoginOverlay').addEventListener('click',e=>{
+  if(e.target===document.getElementById('adminLoginOverlay')) closeAdminLogin();
+});
+
+function openAdminPanel(){
+  renderAdminChannels();
+  renderAdminAvatars();
+  renderAdminTicker();
   document.getElementById('adminPanelOverlay').classList.add('open');
 }
-function closeAdminPanel() {
+function closeAdminPanel(){
   document.getElementById('adminPanelOverlay').classList.remove('open');
 }
-document.getElementById('adminPanelOverlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('adminPanelOverlay')) closeAdminPanel();
+document.getElementById('adminPanelOverlay').addEventListener('click',e=>{
+  if(e.target===document.getElementById('adminPanelOverlay')) closeAdminPanel();
 });
+document.getElementById('adminLogoutBtn').onclick=()=>{ isAdmin=false; closeAdminPanel() };
 
-document.getElementById('adminLogoutBtn').onclick = () => {
-  isAdmin = false;
-  closeAdminPanel();
-};
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
 
-function renderAdminChList() {
-  const list = document.getElementById('adminChList');
-  document.getElementById('adminChCount').textContent = CHANNELS.length;
-  list.innerHTML = '';
-  CHANNELS.forEach((ch, idx) => {
-    const item = document.createElement('div');
-    item.className = 'admin-ch-item';
-    item.innerHTML = `
-      <span class="admin-ch-item-name">${esc(ch.name)}</span>
-      <span class="admin-ch-item-id">${esc(ch.id)}</span>
+/* CHANNELS TAB */
+function renderAdminChannels(){
+  const list=document.getElementById('adminChList');
+  document.getElementById('adminChCount').textContent=CHANNELS.length;
+  list.innerHTML='';
+  CHANNELS.forEach((ch,idx)=>{
+    const d=ytCache[ch.id];
+    const thumb=customAvatars[ch.id]||d?.thumb||'';
+    const item=document.createElement('div');
+    item.className='admin-ch-item';
+    item.innerHTML=`
+      <div class="admin-ch-av">${thumb?`<img src="${thumb}" alt="">`:
+        `<div class="init">${initials(ch.name)}</div>`}</div>
+      <span class="admin-ch-name">${esc(ch.name)}</span>
+      <span class="admin-ch-handle">${esc(ch.id)}</span>
       <button class="admin-ch-del" data-idx="${idx}" title="Hapus">✕</button>`;
     list.appendChild(item);
   });
-  list.querySelectorAll('.admin-ch-del').forEach(btn => {
-    btn.onclick = () => {
-      const idx = parseInt(btn.dataset.idx);
-      CHANNELS.splice(idx, 1);
-      saveChannels();
-      renderAdminChList();
-      renderAll();
+  list.querySelectorAll('.admin-ch-del').forEach(btn=>{
+    btn.onclick=()=>{
+      CHANNELS.splice(parseInt(btn.dataset.idx),1);
+      saveChannels(); renderAdminChannels(); renderAll();
     };
   });
 }
 
-document.getElementById('addChBtn').onclick = () => {
-  const name = document.getElementById('addChName').value.trim();
-  const id   = document.getElementById('addChId').value.trim();
-  if (!name || !id) return;
-  CHANNELS.push({ id, name });
+document.getElementById('addChBtn').onclick=async()=>{
+  const name=document.getElementById('addChName').value.trim();
+  const handle=document.getElementById('addChHandle').value.trim();
+  const status=document.getElementById('addChStatus');
+  if(!name||!handle){ status.textContent='⚠ Nama dan username wajib diisi'; status.style.color='#ff5252'; return }
+  status.textContent='⏳ Mencari channel...'; status.style.color='var(--text3)';
+  const btn=document.getElementById('addChBtn');
+  btn.disabled=true; btn.textContent='...';
+  const id=await resolveChannelId(handle);
+  btn.disabled=false; btn.textContent='+ Tambah';
+  if(!id){ status.textContent='❌ Channel tidak ditemukan. Coba Channel ID (UCxxxx)'; status.style.color='#ff5252'; return }
+  if(CHANNELS.find(c=>c.id===id)){ status.textContent='⚠ Channel sudah ada'; status.style.color='#ff5252'; return }
+  CHANNELS.push({id,name});
   saveChannels();
-  document.getElementById('addChName').value = '';
-  document.getElementById('addChId').value   = '';
-  renderAdminChList();
-  renderAll();
+  document.getElementById('addChName').value='';
+  document.getElementById('addChHandle').value='';
+  status.textContent='✅ Channel berhasil ditambah!'; status.style.color='var(--green)';
+  setTimeout(()=>{ status.textContent='' },3000);
+  renderAdminChannels(); renderAll();
 };
 
-/* ════════════════════════════════════════
-   MULTIWATCH
-   ════════════════════════════════════════ */
-let mwLayout = '3';
-let mwSlots  = [];
-let mwPickerTargetSlot = -1;
-let mwChatOpen = false;
-let mwActiveChatSlot = -1;
-const MW_LAYOUTS = { '3': 3, '4': 4, '6': 6, '9': 9 };
+/* AVATARS TAB */
+function renderAdminAvatars(){
+  const list=document.getElementById('adminAvList');
+  list.innerHTML='';
+  CHANNELS.forEach(ch=>{
+    const d=ytCache[ch.id];
+    const ytThumb=d?.thumb||'';
+    const custom=customAvatars[ch.id]||'';
+    const shown=custom||ytThumb;
+    const item=document.createElement('div');
+    item.className='admin-av-item';
+    item.innerHTML=`
+      <div class="av-preview">${shown?`<img src="${shown}" alt="" onerror="this.style.display='none'">`:
+        `<div style="font-family:var(--font-display);font-size:.55rem;font-weight:800;color:var(--red)">${initials(ch.name)}</div>`}</div>
+      <div class="av-name">${esc(ch.name)}</div>
+      <input class="av-url-input" type="url" placeholder="URL foto profil (kosongkan = auto YT)" value="${esc(custom)}" data-id="${ch.id}">
+      <button class="btn-av-save" data-id="${ch.id}">Simpan</button>`;
+    list.appendChild(item);
+  });
+  list.querySelectorAll('.btn-av-save').forEach(btn=>{
+    btn.onclick=()=>{
+      const id=btn.dataset.id;
+      const url=list.querySelector(`.av-url-input[data-id="${id}"]`).value.trim();
+      if(url) customAvatars[id]=url; else delete customAvatars[id];
+      saveCustomAvatars();
+      btn.textContent='✓';
+      setTimeout(()=>{ btn.textContent='Simpan' },1500);
+      // Re-enrich card
+      const ch=CHANNELS.find(c=>c.id===id);
+      if(ch) enrichCard(ch);
+      renderAdminAvatars();
+    };
+  });
+}
 
-function openMultiwatch() {
-  document.getElementById('multiwatchOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  if (mwSlots.length === 0) initMwSlots();
+/* TICKER TAB */
+function renderAdminTicker(){
+  const list=document.getElementById('tickerList');
+  document.getElementById('tickerCount').textContent=tickerItems.length;
+  list.innerHTML='';
+  tickerItems.forEach((t,idx)=>{
+    const row=document.createElement('div');
+    row.className='ticker-item-row';
+    row.innerHTML=`<span class="t-text">${esc(t)}</span>
+      <button class="ticker-item-del" data-idx="${idx}" title="Hapus">✕</button>`;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('.ticker-item-del').forEach(btn=>{
+    btn.onclick=()=>{
+      tickerItems.splice(parseInt(btn.dataset.idx),1);
+      saveTicker(); renderAdminTicker(); renderTicker();
+    };
+  });
+  // Speed
+  const spd=parseInt(localStorage.getItem('bfltv_ticker_speed')||'30');
+  document.getElementById('tickerSpeed').value=spd;
+  document.getElementById('tickerSpeedVal').textContent=spd+'s';
+}
+document.getElementById('addTickerBtn').onclick=()=>{
+  const txt=document.getElementById('addTickerText').value.trim();
+  if(!txt) return;
+  tickerItems.push(txt);
+  saveTicker();
+  document.getElementById('addTickerText').value='';
+  renderAdminTicker(); renderTicker();
+};
+document.getElementById('tickerSpeed').oninput=function(){
+  updateTickerSpeed(this.value);
+};
+
+/* ── MULTIWATCH ── */
+let mwLayout='3';
+let mwSlots=[];
+let mwPickerTarget=-1;
+const MW_COUNT={'3':3,'4':4,'6':6,'9':9};
+
+function openMultiwatch(){
+  document.getElementById('mwOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  if(!mwSlots.length){
+    const n=MW_COUNT[mwLayout];
+    for(let i=0;i<n;i++) mwSlots.push({ch:i<CHANNELS.length?CHANNELS[i]:null});
+  }
   renderMwGrid();
 }
-function closeMultiwatch() {
-  document.getElementById('multiwatchOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-  document.querySelectorAll('#mwGrid iframe').forEach(f => f.src = '');
-  if (mwChatOpen) toggleChat(true);
+function closeMultiwatch(){
+  document.getElementById('mwOverlay').classList.remove('open');
+  document.body.style.overflow='';
+  document.querySelectorAll('#mwGrid iframe').forEach(f=>f.src='');
 }
-function setMwLayout(layout) {
-  mwLayout = layout;
-  document.querySelectorAll('.mw-layout-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('mwBtn' + layout).classList.add('active');
-  const count = MW_LAYOUTS[layout];
-  while (mwSlots.length < count) mwSlots.push({ ch: null });
+function setMwLayout(l){
+  mwLayout=l;
+  document.querySelectorAll('.mw-layout-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('mwBtn'+l).classList.add('active');
+  const n=MW_COUNT[l];
+  while(mwSlots.length<n) mwSlots.push({ch:null});
   renderMwGrid();
-  renderChatTabs();
 }
-function initMwSlots() {
-  mwSlots = [];
-  const count = MW_LAYOUTS[mwLayout];
-  for (let i = 0; i < count; i++)
-    mwSlots.push({ ch: i < CHANNELS.length ? CHANNELS[i] : null });
-}
-function renderMwGrid() {
-  const grid = document.getElementById('mwGrid');
-  grid.className = 'mw-grid layout-' + mwLayout;
-  const count = MW_LAYOUTS[mwLayout];
-  grid.innerHTML = '';
-  for (let i = 0; i < count; i++) {
-    const slot = mwSlots[i] || { ch: null };
-    const div = document.createElement('div');
-    div.className = 'mw-slot';
-    if (slot.ch) {
-      const embedSrc = `https://www.youtube.com/embed/live_stream?channel=${slot.ch.id}&autoplay=1&mute=${i>0?1:0}&controls=1`;
-      div.innerHTML = `
-        <iframe src="${embedSrc}"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen></iframe>
+function renderMwGrid(){
+  const grid=document.getElementById('mwGrid');
+  grid.className='mw-grid layout-'+mwLayout;
+  grid.innerHTML='';
+  const n=MW_COUNT[mwLayout];
+  for(let i=0;i<n;i++){
+    const slot=mwSlots[i]||{ch:null};
+    const div=document.createElement('div');
+    div.className='mw-slot';
+    if(slot.ch){
+      div.innerHTML=`
+        <iframe src="https://www.youtube.com/embed/live_stream?channel=${slot.ch.id}&autoplay=1&mute=${i>0?1:0}&controls=1"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         <div class="mw-slot-bar">
           <span class="mw-slot-name">${esc(slot.ch.name)}</span>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <button class="mw-slot-select" onclick="chatFromSlot(${i})" title="Buka chat">💬</button>
-            <button class="mw-slot-select" onclick="openPicker(${i})">Ganti ▾</button>
-          </div>
+          <button class="mw-slot-btn" onclick="openPicker(${i})">Ganti ▾</button>
         </div>`;
     } else {
-      div.innerHTML = `
+      div.innerHTML=`
         <div class="mw-empty" onclick="openPicker(${i})">
-          <div class="mw-empty-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--red)"><path d="M12 4v16m-8-8h16"/></svg>
+          <div class="mw-empty-ring">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--red)"><path d="M12 4v16m-8-8h16"/></svg>
           </div>
           <span class="mw-empty-txt">Pilih Channel</span>
         </div>
-        <div class="mw-slot-bar">
-          <span class="mw-slot-name" style="color:rgba(255,255,255,.2)">Slot ${i+1}</span>
-          <button class="mw-slot-select" onclick="openPicker(${i})">Pilih ▾</button>
+        <div class="mw-slot-bar"><span class="mw-slot-name" style="color:rgba(255,255,255,.15)">Slot ${i+1}</span>
+          <button class="mw-slot-btn" onclick="openPicker(${i})">Pilih ▾</button>
         </div>`;
     }
     grid.appendChild(div);
   }
-  renderChatTabs();
 }
-
-function chatFromSlot(slotIdx) {
-  if (!mwChatOpen) toggleChat();
-  switchChatTab(slotIdx);
-}
-
-/* ── LIVE CHAT ── */
-function toggleChat(forceClose) {
-  mwChatOpen = forceClose ? false : !mwChatOpen;
-  const sidebar = document.getElementById('mwChatSidebar');
-  const btn     = document.getElementById('btnToggleChat');
-  sidebar.classList.toggle('open', mwChatOpen);
-  btn.classList.toggle('active', mwChatOpen);
-  if (mwChatOpen && mwActiveChatSlot < 0) {
-    const first = mwSlots.findIndex(s => s && s.ch);
-    if (first >= 0) switchChatTab(first);
-  }
-}
-function renderChatTabs() {
-  const tabs = document.getElementById('mwChatTabs');
-  tabs.innerHTML = '';
-  const count = MW_LAYOUTS[mwLayout];
-  for (let i = 0; i < count; i++) {
-    const slot = mwSlots[i];
-    if (!slot || !slot.ch) continue;
-    const tab = document.createElement('button');
-    tab.className = 'mw-chat-tab' + (i === mwActiveChatSlot ? ' active' : '');
-    tab.textContent = slot.ch.name.split(' ')[0];
-    tab.title = slot.ch.name;
-    tab.onclick = () => switchChatTab(i);
-    tabs.appendChild(tab);
-  }
-}
-const videoIdCache = {};
-async function getVideoId(channelId) {
-  if (videoIdCache[channelId]) return videoIdCache[channelId];
-  try {
-    const resp = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/channel/${channelId}/live`, { signal: AbortSignal.timeout(4000) });
-    const data = await resp.json();
-    const match = data?.thumbnail_url?.match(/\/vi\/([^/]+)\//);
-    if (match) { videoIdCache[channelId] = match[1]; return match[1]; }
-  } catch(e) {}
-  return null;
-}
-let currentChatChannelId = null;
-async function switchChatTab(slotIdx) {
-  mwActiveChatSlot = slotIdx;
-  renderChatTabs();
-  const slot = mwSlots[slotIdx];
-  const wrap  = document.getElementById('mwChatFrameWrap');
-  const empty = document.getElementById('mwChatEmpty');
-  const error = document.getElementById('mwChatError');
-  error.classList.remove('show');
-  wrap.querySelector('iframe')?.remove();
-  if (!slot || !slot.ch) { empty.style.display = 'flex'; return; }
-  empty.style.display = 'none';
-  currentChatChannelId = slot.ch.id;
-  let loadingEl = wrap.querySelector('.mw-chat-loading');
-  if (!loadingEl) {
-    loadingEl = document.createElement('div');
-    loadingEl.className = 'mw-chat-loading';
-    loadingEl.innerHTML = `<div class="mw-chat-loading-spinner"></div><p>Memuat chat...</p>`;
-    wrap.appendChild(loadingEl);
-  }
-  loadingEl.style.display = 'flex';
-  const videoId = await getVideoId(slot.ch.id);
-  loadingEl.style.display = 'none';
-  if (!videoId) { showChatError(slot.ch, null); return; }
-  const domain = location.hostname || 'localhost';
-  const chatUrl = `https://www.youtube.com/live_chat?v=${videoId}&embed_domain=${domain}&dark_theme=1`;
-  const iframe = document.createElement('iframe');
-  iframe.src = chatUrl;
-  iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media';
-  iframe.style.cssText = 'width:100%;height:100%;border:0;';
-  let loaded = false;
-  iframe.onload = () => { loaded = true; error.classList.remove('show'); };
-  setTimeout(() => { if (!loaded) showChatError(slot.ch, videoId); }, 5000);
-  wrap.appendChild(iframe);
-  wrap.dataset.videoId = videoId;
-  wrap.dataset.channelId = slot.ch.id;
-  wrap.dataset.channelName = slot.ch.name;
-}
-function showChatError(ch, videoId) {
-  const error  = document.getElementById('mwChatError');
-  const detail = document.getElementById('mwChatErrorDetail');
-  detail.textContent = videoId
-    ? `Video ID: ${videoId} — YouTube memblokir embed chat dari domain ini.`
-    : `Channel "${ch.name}" mungkin belum live atau belum mendukung chat.`;
-  error.classList.add('show');
-  document.getElementById('mwChatFrameWrap').dataset.videoId = videoId || '';
-  document.getElementById('mwChatFrameWrap').dataset.channelId = ch.id;
-}
-function openChatInPopup() {
-  const wrap = document.getElementById('mwChatFrameWrap');
-  const videoId = wrap.dataset.videoId;
-  const channelId = wrap.dataset.channelId;
-  const url = videoId
-    ? `https://www.youtube.com/live_chat?v=${videoId}&is_popout=1`
-    : `https://www.youtube.com/channel/${channelId}/live`;
-  window.open(url, '_blank', 'width=380,height=600,left=100,top=100');
-}
-
-/* ── PICKER ── */
-function openPicker(slotIdx) {
-  mwPickerTargetSlot = slotIdx;
-  document.getElementById('mwPickerSearch').value = '';
+function openPicker(idx){
+  mwPickerTarget=idx;
+  document.getElementById('mwPickerSearch').value='';
   renderPickerList('');
   document.getElementById('mwPickerOverlay').classList.add('open');
 }
-function closePicker() {
-  document.getElementById('mwPickerOverlay').classList.remove('open');
-  mwPickerTargetSlot = -1;
-}
-function filterPicker() {
-  renderPickerList(document.getElementById('mwPickerSearch').value.toLowerCase());
-}
-function renderPickerList(query) {
-  const list = document.getElementById('mwPickerList');
-  list.innerHTML = '';
-  CHANNELS.filter(ch => ch.name.toLowerCase().includes(query)).forEach(ch => {
-    const init = ch.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
-    const item = document.createElement('div');
-    item.className = 'mw-picker-item';
-    item.innerHTML = `<div class="mw-picker-avatar">${esc(init)}</div><span class="mw-picker-ch-name">${esc(ch.name)}</span>`;
-    item.onclick = () => selectChannelForSlot(ch);
+function closePicker(){ document.getElementById('mwPickerOverlay').classList.remove('open'); mwPickerTarget=-1 }
+function filterPicker(){ renderPickerList(document.getElementById('mwPickerSearch').value.toLowerCase()) }
+function renderPickerList(q){
+  const list=document.getElementById('mwPickerList');
+  list.innerHTML='';
+  CHANNELS.filter(ch=>ch.name.toLowerCase().includes(q)).forEach(ch=>{
+    const d=ytCache[ch.id];
+    const thumb=customAvatars[ch.id]||d?.thumb||'';
+    const item=document.createElement('div');
+    item.className='mw-picker-item';
+    item.innerHTML=`
+      <div class="mw-picker-av">${thumb?`<img src="${thumb}" alt="">`:
+        `<div class="init">${initials(ch.name)}</div>`}</div>
+      <span class="mw-picker-ch-name">${esc(ch.name)}</span>`;
+    item.onclick=()=>{
+      if(mwPickerTarget<0) return;
+      mwSlots[mwPickerTarget]={ch};
+      closePicker(); renderMwGrid();
+    };
     list.appendChild(item);
   });
 }
-function selectChannelForSlot(ch) {
-  if (mwPickerTargetSlot < 0) return;
-  if (!mwSlots[mwPickerTargetSlot]) mwSlots[mwPickerTargetSlot] = {};
-  mwSlots[mwPickerTargetSlot].ch = ch;
-  if (mwPickerTargetSlot === mwActiveChatSlot) switchChatTab(mwActiveChatSlot);
-  closePicker();
-  renderMwGrid();
-}
-document.getElementById('mwPickerOverlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('mwPickerOverlay')) closePicker();
+document.getElementById('mwPickerOverlay').addEventListener('click',e=>{
+  if(e.target===document.getElementById('mwPickerOverlay')) closePicker();
+});
+
+/* ── ESC KEY ── */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ closePlayer(); closeAdminLogin(); closeAdminPanel(); closeMultiwatch(); closePicker() }
 });
 
 /* ── INIT ── */
-function init() {
-  loadChannels();
-  setTimeout(() => {
+function init(){
+  loadData();
+  loadTicker();
+  loadCustomAvatars();
+  renderTicker();
+
+  // Theme fix
+  const spd=parseInt(localStorage.getItem('bfltv_ticker_speed')||'30');
+  document.getElementById('tickerInner').style.animationDuration=spd+'s';
+
+  setTimeout(()=>{
     document.getElementById('loadingScreen').classList.add('hidden');
-    document.getElementById('mainContent').style.display = 'block';
-  }, 1400);
-  updateStatus('Memeriksa status live semua channel...');
+    document.getElementById('mainContent').style.display='block';
+  },1500);
+
   renderAll();
-  setTimeout(() => updateStatus(`${CHANNELS.length} channel dimuat`, true), 2000);
+  setTimeout(()=>startLiveDetect(),2000);
 }
 
 document.addEventListener('DOMContentLoaded', init);
