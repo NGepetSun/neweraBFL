@@ -1,3 +1,224 @@
+elvanprmn
+jinmori8369
+NPC
+
+asisten LURAH BFL
+APP
+ — 6/10/26, 1:24 PM
+❌ Pilihan tidak valid. Balas 1-7.
+elvanprmn [SUI],  — 6/10/26, 1:26 PM
+5
+asisten LURAH BFL
+APP
+ — 6/10/26, 1:26 PM
+✏️ Set harga Legendary
+Harga saat ini: Rp2,000
+
+Balas dengan harga baru (angka saja).
+Contoh: 1500
+elvanprmn [SUI],  — 6/10/26, 1:26 PM
+7000
+asisten LURAH BFL
+APP
+ — 6/10/26, 1:26 PM
+✅ Harga Legendary diubah ke Rp7,000
+Lanjut edit? Balas angka rarity atau 7 untuk selesai.
+elvanprmn [SUI],  — 6/10/26, 1:26 PM
+7
+asisten LURAH BFL
+APP
+ — 6/10/26, 1:26 PM
+✅ Harga Berhasil Disimpan!
+💰 Harga Final
+Common: Rp0
+Uncommon: Rp200
+Rare: Rp500
+Epic: Rp1,000
+Legendary: Rp7,000
+IDR Gacha: Rp200 – Rp1,000
+elvanprmn [SUI],  — 6/10/26, 1:26 PM
+!setpokeprice
+asisten LURAH BFL
+APP
+ — 6/10/26, 1:26 PM
+⚙️ Set Harga Jual Pokemon
+Pilih rarity yang ingin diubah harganya.
+Balas dengan angka pilihanmu:
+
+1. Common     (tidak bisa dijual)
+2. Uncommon
+3. Rare
+4. Epic
+5. Legendary
+6. Range IDR Gacha (min & max)
+7. Selesai
+💰 Harga Saat Ini
+Common: Rp0
+Uncommon: Rp200
+Rare: Rp500
+Epic: Rp1,000
+Legendary: Rp7,000
+IDR Gacha: Rp200 – Rp1,000
+Ketik 7 untuk selesai kapan saja.
+elvanprmn [SUI],  — 6/10/26, 1:26 PM
+4
+asisten LURAH BFL
+APP
+ — 6/10/26, 1:26 PM
+✏️ Set harga Epic
+Harga saat ini: Rp1,000
+
+Balas dengan harga baru (angka saja).
+Contoh: 1500
+elvanprmn [SUI],  — 6/10/26, 1:27 PM
+3500
+asisten LURAH BFL
+APP
+ — 6/10/26, 1:27 PM
+✅ Harga Epic diubah ke Rp3,500
+Lanjut edit? Balas angka rarity atau 7 untuk selesai.
+elvanprmn [SUI],  — 6/10/26, 1:27 PM
+7
+asisten LURAH BFL
+APP
+ — 6/10/26, 1:27 PM
+✅ Harga Berhasil Disimpan!
+💰 Harga Final
+Common: Rp0
+Uncommon: Rp200
+Rare: Rp500
+Epic: Rp3,500
+Legendary: Rp7,000
+IDR Gacha: Rp200 – Rp1,000
+💳 Saldo Kamu
+💰 Saldo IDR
+Rp1,196
+🎒 Jumlah Kartu
+8 kartu
+📈 Nilai Inventory
+Rp7,800
+Image
+!withdraw <jumlah> — min Rp15,000•6/10/26, 1:27 PM
+elvanprmn [SUI],  — 6/10/26, 1:33 PM
+!setpokeprice
+asisten LURAH BFL
+APP
+ — 6/10/26, 1:33 PM
+⚙️ Set Harga Jual Pokemon
+Pilih rarity yang ingin diubah harganya.
+Balas dengan angka pilihanmu:
+
+1. Common     (tidak bisa dijual)
+2. Uncommon
+3. Rare
+4. Epic
+5. Legendary
+6. Range IDR Gacha (min & max)
+7. Selesai
+💰 Harga Saat Ini
+Common: Rp0
+Uncommon: Rp200
+Rare: Rp500
+Epic: Rp3,500
+Legendary: Rp7,000
+IDR Gacha: Rp200 – Rp1,000
+Ketik 7 untuk selesai kapan saja.
+elvanprmn [SUI],  — 6/10/26, 1:33 PM
+2
+asisten LURAH BFL
+APP
+ — 6/10/26, 1:33 PM
+✏️ Set harga Uncommon
+Harga saat ini: Rp200
+
+Balas dengan harga baru (angka saja).
+Contoh: 1500
+elvanprmn [SUI],  — 6/10/26, 1:33 PM
+210
+asisten LURAH BFL
+APP
+ — 6/10/26, 1:33 PM
+✅ Harga Uncommon diubah ke Rp210
+Lanjut edit? Balas angka rarity atau 7 untuk selesai.
+elvanprmn [SUI],  — 6/10/26, 1:33 PM
+3
+asisten LURAH BFL
+APP
+ — 6/10/26, 1:33 PM
+✏️ Set harga Rare
+Harga saat ini: Rp500
+
+Balas dengan harga baru (angka saja).
+Contoh: 1500
+elvanprmn [SUI],  — 6/10/26, 1:33 PM
+450
+asisten LURAH BFL
+APP
+ — 6/10/26, 1:33 PM
+✅ Harga Rare diubah ke Rp450
+Lanjut edit? Balas angka rarity atau 7 untuk selesai.
+elvanprmn [SUI],  — 6/10/26, 1:33 PM
+7
+asisten LURAH BFL
+APP
+ — 6/10/26, 1:33 PM
+✅ Harga Berhasil Disimpan!
+💰 Harga Final
+Common: Rp0
+Uncommon: Rp210
+Rare: Rp450
+Epic: Rp3,500
+Legendary: Rp7,000
+IDR Gacha: Rp200 – Rp1,000
+elvanprmn [SUI],  — 11:46 AM
+Image
+elvanprmn [SUI],  — 7:15 PM
+// /api/livestatus.js
+// Vercel Serverless Function: cek status LIVE semua channel tanpa YouTube API key.
+// Hasil di-cache di memory selama CACHE_TTL detik agar request dari banyak
+// pengunjung tidak memicu request berulang ke YouTube (hemat & anti rate-limit).
+
+const CACHE_TTL = 90 * 1000; // 90 detik
+
+livestatus.js
+8 KB
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BFL TV — Live Streaming</title>... (25 KB left)
+
+index.html
+75 KB
+elvanprmn [SUI],  — 7:27 PM
+// /api/channels.js
+// GET  -> kembalikan daftar channel (terlihat semua orang)
+// POST -> admin update daftar channel (butuh password), tersimpan di Vercel KV
+//
+// SETUP DI VERCEL:
+// 1. Database "upstash-kv-aquamarine-ball" sudah terhubung ke project ini, dan
+
+channels.js
+7 KB
+// /api/livestatus.js
+// Vercel Serverless Function: cek status LIVE semua channel tanpa YouTube API key.
+// Hasil di-cache di memory selama CACHE_TTL detik agar request dari banyak
+// pengunjung tidak memicu request berulang ke YouTube (hemat & anti rate-limit).
+
+const CACHE_TTL = 90 * 1000; // 90 detik
+
+livestatus.js
+8 KB
+﻿
+asisten LURAH BFL 
+APP
+asisten LURAH BFL
+#1064
+Bot Develop by @elvanprmn
+
+Any Question?
+Dm @elvanprmn
 // /api/livestatus.js
 // Vercel Serverless Function: cek status LIVE semua channel tanpa YouTube API key.
 // Hasil di-cache di memory selama CACHE_TTL detik agar request dari banyak
@@ -84,7 +305,7 @@ async function checkChannel(ch) {
   const url = `https://www.youtube.com/channel/${ch.id}/live`;
   try {
     const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), 8000);
+    const t = setTimeout(() => controller.abort(), 5000);
     const res = await fetch(url, {
       headers: {
         "User-Agent": UA,
@@ -126,7 +347,7 @@ async function checkChannel(ch) {
 
 // Jalankan pengecekan dengan concurrency terbatas agar tidak membebani
 // konejsi server / kena rate-limit YouTube.
-async function checkAll(channels, concurrency = 6) {
+async function checkAll(channels, concurrency = 10) {
   const results = {};
   let idx = 0;
 
@@ -144,7 +365,7 @@ async function checkAll(channels, concurrency = 6) {
   return results;
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=120");
 
@@ -160,7 +381,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const data = await checkAll(CHANNELS, 6);
+    const data = await checkAll(CHANNELS, 10);
     cache = { timestamp: now, data };
     return res.status(200).json({
       cached: false,
@@ -180,3 +401,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: String(e.message || e) });
   }
 }
+livestatus.js
+8 KB
