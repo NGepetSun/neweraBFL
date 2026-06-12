@@ -918,6 +918,12 @@ input[type=range]{flex:1;accent-color:var(--red)}
   </div>
 </div>
 
+<!-- DEBUG BUTTON & PANEL -->
+<button onclick="toggleDebugPanel()" style="position:fixed;bottom:80px;right:14px;z-index:5000;width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--chip);color:var(--text2);font-size:.9rem;cursor:pointer">🐞</button>
+<div id="debugPanel" style="display:none;position:fixed;bottom:120px;right:14px;left:14px;max-height:50vh;overflow:auto;z-index:5000;background:#000;color:#0f0;font-family:monospace;font-size:.65rem;padding:10px;border-radius:8px;border:1px solid #333;white-space:pre-wrap">
+  <pre id="debugLogBody"></pre>
+</div>
+
 <script>
 /* ══════════════════════════════════════
    CONFIG
@@ -992,6 +998,23 @@ function fmtNum(n){
   return n.toString();
 }
 function initials(name){ return name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase() }
+
+/* ── DEBUG PANEL (live check log, tap-to-show) ── */
+let debugLog=[];
+function logDebug(name,url,result){
+  debugLog.push(`${name}: ${result}`);
+  if(debugLog.length>200) debugLog.shift();
+  const panel=document.getElementById('debugPanel');
+  if(panel && panel.style.display==='block'){
+    document.getElementById('debugLogBody').textContent=debugLog.join('\n');
+  }
+}
+function toggleDebugPanel(){
+  const panel=document.getElementById('debugPanel');
+  const open=panel.style.display==='block';
+  panel.style.display=open?'none':'block';
+  if(!open) document.getElementById('debugLogBody').textContent=debugLog.join('\n')||'(belum ada data, tunggu beberapa detik...)';
+}
 
 /* ── THEME ── */
 (function(){
@@ -1293,10 +1316,11 @@ async function checkLiveSingle(ch){
   for(const oembedUrl of urls){
     try{
       const res = await fetch(oembedUrl, {signal: AbortSignal.timeout(10000)});
-      if(!res.ok){ continue }
+      if(!res.ok){ logDebug(ch.name, oembedUrl, 'HTTP '+res.status); continue }
       const data = await res.json();
-      if(data && data.error){ delete liveVideoIds[ch.id]; setLive(ch.id,false); return }
+      if(data && data.error){ logDebug(ch.name, oembedUrl, 'error: '+data.error); delete liveVideoIds[ch.id]; setLive(ch.id,false); return }
       const isLive = !!(data && data.title);
+      logDebug(ch.name, oembedUrl, 'OK live='+isLive);
       if(isLive && data.thumbnail_url){
         const vidMatch = data.thumbnail_url.match(/\/vi\/([a-zA-Z0-9_-]{11})\//);
         if(vidMatch) liveVideoIds[ch.id] = vidMatch[1];
@@ -1306,7 +1330,7 @@ async function checkLiveSingle(ch){
       }
       setLive(ch.id, isLive);
       return;
-    }catch(e){ /* try next url */ }
+    }catch(e){ logDebug(ch.name, oembedUrl, 'fail: '+e.message); }
   }
   // Semua gagal → anggap offline
   delete liveVideoIds[ch.id];
