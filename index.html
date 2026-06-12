@@ -1285,15 +1285,18 @@ function applyFilter(){
 // Jika channel LIVE       → YouTube return JSON dengan title stream → kita tandai live
 
 async function checkLiveSingle(ch){
-  const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent('https://www.youtube.com/channel/'+ch.id+'/live')}&format=json`;
-  try{
-    const res = await fetch(oembedUrl, {signal: AbortSignal.timeout(10000)});
-    if(res.ok){
+  const target = 'https://www.youtube.com/channel/'+ch.id+'/live';
+  const urls = [
+    `https://noembed.com/embed?url=${encodeURIComponent(target)}`,
+    `https://www.youtube.com/oembed?url=${encodeURIComponent(target)}&format=json`
+  ];
+  for(const oembedUrl of urls){
+    try{
+      const res = await fetch(oembedUrl, {signal: AbortSignal.timeout(10000)});
+      if(!res.ok){ continue }
       const data = await res.json();
-      // Berhasil dapat data = channel sedang live
+      if(data && data.error){ delete liveVideoIds[ch.id]; setLive(ch.id,false); return }
       const isLive = !!(data && data.title);
-      // Coba ambil videoId dari thumbnail_url oembed
-      // Format: https://i.ytimg.com/vi/{videoId}/hqdefault.jpg
       if(isLive && data.thumbnail_url){
         const vidMatch = data.thumbnail_url.match(/\/vi\/([a-zA-Z0-9_-]{11})\//);
         if(vidMatch) liveVideoIds[ch.id] = vidMatch[1];
@@ -1302,16 +1305,12 @@ async function checkLiveSingle(ch){
         delete liveVideoIds[ch.id];
       }
       setLive(ch.id, isLive);
-    } else {
-      // 404 = tidak live
-      delete liveVideoIds[ch.id];
-      setLive(ch.id, false);
-    }
-  }catch(e){
-    // Network error / timeout → anggap offline, jangan crash
-    delete liveVideoIds[ch.id];
-    setLive(ch.id, false);
+      return;
+    }catch(e){ /* try next url */ }
   }
+  // Semua gagal → anggap offline
+  delete liveVideoIds[ch.id];
+  setLive(ch.id, false);
 }
 
 async function startLiveDetect(){
@@ -1646,6 +1645,8 @@ function init(){
 
   renderAll();
   setTimeout(()=>startLiveDetect(),2000);
+  // Cek ulang status LIVE setiap 60 detik (tanpa API key, pakai oEmbed)
+  setInterval(()=>runLiveDetect(),60000);
 }
 
 document.addEventListener('DOMContentLoaded', init);
