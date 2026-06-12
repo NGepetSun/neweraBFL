@@ -5,35 +5,82 @@
  * ============================================================
  */
 
-const CHANNELS = [
-  { id: "UCJTq8YQXj-2_BNgwis4SGsg", name: "RonnyBons"    },
-  { id: "UCBu6n7CY3k_HdX8THmyEOEw", name: "Abeegel"      },
-  { id: "UCz4s1BgKNXTwOHO0PHQHQxQ", name: "Kafeyinhere"  },
-  { id: "UCsUhlZAanKWUsZxqbPbjAOw", name: "Fahrul Reyza" },
-  { id: "UCZHSRSIP9m2uxOAOlVJGytw", name: "Danny"         },
-  { id: "UCamUqGw_jBciNhBNwBcJFRg", name: "Nathann"       },
-  { id: "UCKciWscgYbPCuAdtX91x06w", name: "Deplonnn"      },
-  { id: "UCvrhggVJsdR6uYvuIrX_Grg", name: "Dipiwww"       },
-  { id: "UCrvlbX01F8qtXlJDXX7czVg", name: "Rey"           },
-  { id: "UCYKxEdT_OBIUv7_zJkyQkdg", name: "AndreMemet"    },
-  { id: "UCQV0qkau8jIHyn5iRY6bIcg", name: "Syacei"        },
-  { id: "UCKN2A4ShReXSHJER9_lfwLw", name: "Bopeng16"      },
-  { id: "UChEzBCVwQg3EC7QjsF3iZHw", name: "Zotafrz"       },
-  { id: "UC-x7sdu_4FNa5fsGDr3nfbQ", name: "Nanzz"         },
-  { id: "UCUC6Ovlo-UNQD5lKcLIn6Q",  name: "Neyna"         },
-  { id: "UCt2QdjyIsTHOVzFlTB37UeA", name: "artszzy"       },
-  { id: "UCb9tHaLY3XFM6V2Is_Z2R6A", name: "Eko D Libra"   },
-  { id: "UCgqC90SQYpod4-Ys-6NVUHw", name: "Edot"          },
-  { id: "UCZyUX_68LnJ-AA6REPU45Ew", name: "Jonanthan"     },
+// Channel list diambil dari /api/channels (Vercel KV)
+// Kalau API gagal, pakai DEFAULT_CHANNELS sebagai fallback
+const DEFAULT_CHANNELS = [
+  { id: "UCCuzDCoI3EUOo_nhCj4noSw", name: "Marapthon" },
+  { id: "UCJTq8YQXj-2_BNgwis4SGsg", name: "RonnyBons" },
+  { id: "UCBu6n7CY3k_HdX8THmyEOEw", name: "Abeegel" },
+  { id: "UCz4s1BgKNXTwOHO0PHQHQxQ", name: "Kafeyinhere" },
+  { id: "UCgrOxB6ZNPQeWJ1PpIHjXlQ", name: "Johnn" },
+  { id: "UCZHSRSIP9m2uxOAOlVJGytw", name: "Danny" },
+  { id: "UCamUqGw_jBciNhBNwBcJFRg", name: "Nathann" },
+  { id: "UCKciWscgYbPCuAdtX91x06w", name: "Deplonnn" },
+  { id: "UCvrhggVJsdR6uYvuIrX_Grg", name: "Dipiwww" },
+  { id: "UCrvlbX01F8qtXlJDXX7czVg", name: "Rey" },
+  { id: "UCYKxEdT_OBIUv7_zJkyQkdg", name: "AndreMemet" },
+  { id: "UCQV0qkau8jIHyn5iRY6bIcg", name: "Syacei" },
+  { id: "UCKN2A4ShReXSHJER9_lfwLw", name: "Bopeng16" },
+  { id: "UChEzBCVwQg3EC7QjsF3iZHw", name: "Zotafrz" },
+  { id: "UC-x7sdu_4FNa5fsGDr3nfbQ", name: "Nanzz" },
+  { id: "UCUC6Ovlo-UNQD5lKcLIn6Q",  name: "Neyna" },
+  { id: "UCt2QdjyIsTHOVzFlTB37UeA", name: "artszzy" },
+  { id: "UCb9tHaLY3XFM6V2Is_Z2R6A", name: "Eko D Libra" },
+  { id: "UCgqC90SQYpod4-Ys-6NVUHw", name: "Edot" },
+  { id: "UCZyUX_68LnJ-AA6REPU45Ew", name: "Jonanthan" },
+  { id: "UCPnn55oMeLkr4IF8WTKTdQQ", name: "Sanca" },
+  { id: "UCSU2OYfJXGQiCULNy0PAk7w", name: "Reggie" },
+  { id: "UChQbgqNc8MARGDS17qmXiVw", name: "Robbeyu" },
+  { id: "UCmaXAySgVu7Ptu17PeNCj6w", name: "Samm Kama" },
+  { id: "UCCBHkKFT-XBsBnzVBrXs5Vw", name: "Paddang" },
+  { id: "UCxnQ2cffx4Y5TcPkaWcDfLA", name: "JxxxN" },
+  { id: "UCoxYH2IbvTZFCph-FrMXN4A", name: "Noahh" },
+  { id: "UC9jZ5Wa13rtmCa7Gi1C94aQ", name: "Dandan" },
+  { id: "UCEbWxsOYTODhzRaxaSzbzGA", name: "Hlynn" },
+  { id: "UCdsrkASxJ8QtG55db06789w", name: "Jeffry" },
+  { id: "UC8qd1G66ZssAsr8bf1rR-ww", name: "Tristan" },
+  { id: "UC0mPJmfyM0pyysqo____vrg", name: "Nathanidk" },
+  { id: "UC3QgyfaVyrMrtAWiD-LEznw", name: "Maudy" },
+  { id: "UCFIVpDe3Va4-zyqU7X1OmyQ", name: "AmeyJune" },
+  { id: "UCeC4g-1WDyASRbUCR581LcA", name: "BuayaKayang" },
+  { id: "UCArSnxhpKhVAEsz59qxgUTw", name: "ZaarBot" },
+  { id: "UCec5C8MqoL-Ap21K_xassLA", name: "Cikko" },
+  { id: "UC6NHHEHU9_ryxdcX8Evpvwg", name: "thoriqzi" },
+  { id: "UCXP0FETbRcnTUKfWKT3MMMQ", name: "bhinneka" },
+  { id: "UCpxwg_F4dtqJEnpJ1_IjRTQ", name: "Rigel" },
+  { id: "UCfSzUAtec_V5wDcnhpO2BtQ", name: "L666" },
+  { id: "UCzFMuvYoldcSsAvEhzR0zvA", name: "depoy" },
+  { id: "UCR2hk03Jzm54sPlFiKMlQ1g", name: "CingBakar" },
+  { id: "UCZHwiV6NsiV5dqbn4DHaJRw", name: "Kyuzin" },
+  { id: "UC3XLJcx1dxT-RkC-JhdrjPQ", name: "https" },
+  { id: "UCwrlAmZnhLOu9f3FaJvYk_Q", name: "Vigovel" },
+  { id: "UCfLQtdWfo0x349wXPGB4OdQ", name: "Ardianlk_" },
+  { id: "UCzRbDnymGdZ3Q76BH319FyQ", name: "Lica" },
+  { id: "UC1m-4p7PSs-1R5pXeu5-zcg", name: "BIMA ALVAREZ" },
+  { id: "UCRZ68rP5E5JUVXlQDOQajSw", name: "KinKin" },
+  { id: "UCKbz0Mcaanj2GCicGEzMpWw", name: "Vero" },
+  { id: "UCwsSJX4pMzs_Mw13g29P8rA", name: "Moozzyy" },
+  { id: "UCoHosix7V3Zd411FgDsG3cg", name: "Moza ends u" },
+  { id: "UCtlEqXdxdoc4xYr6cHX9-Fg", name: "Cahya Dwi44" },
+  { id: "UCNhLmDbzYe3O06juIuqUtDg", name: "Idinzzz" },
+  { id: "UCMcOg9uqZd1_5B8d8U1F-HQ", name: "Bengbeng" },
+  { id: "UCTU72lWHiTf6OQr3XM2-_ug", name: "GARREN" },
+  { id: "UCSw9DYtlHEvJAn9ElRchXTg", name: "GALLABI" },
+  { id: "UC8zU0IoT0C9DX2CS45i-YxA", name: "elmiraa" },
+  { id: "UCPsJO9sQY3J-lletKdbG2xQ", name: "matthewah." },
+  { id: "UC_T3McVHAUlLfpA6v8JVqvA", name: "ic Alexandria Pradipta" },
+  { id: "UCiW7vi6ENHUSKCOTk0nZnUw", name: "Nopalll" },
+  { id: "UC5FGwCXwM8Gw4_gNQ2inAgw", name: "NaraLand" },
 ];
 
 // ============================================================
 //  STATE
 // ============================================================
 
+let CHANNELS = []; // diisi dari /api/channels
 let currentLayout = 4;
-let activeChannels = []; // channels shown in multi-view player
-let liveChannels = [];   // channels detected as live
+let activeChannels = [];
+let liveChannels = [];
 let heroChannel = null;
 let playerOpen = false;
 
@@ -65,66 +112,8 @@ const layoutClose    = document.getElementById("layoutClose");
 const lmOpts         = document.querySelectorAll(".lm-opt");
 
 // ============================================================
-//  LIVE DETECTION
-//  Strategy: try to embed the live_stream URL inside a hidden
-//  iframe and use the onerror / onload heuristic. 
-//  Since we can't read iframe content cross-origin, we use the
-//  YouTube oembed endpoint which returns metadata if a live
-//  stream exists.
+//  STATUS BAR
 // ============================================================
-
-async function checkIfLive(channel) {
-  try {
-    const url = `https://www.youtube.com/embed/live_stream?channel=${channel.id}`;
-    // Use oembed to detect: if channel has an active live stream
-    // oembed for channel live doesn't always work, so we use a
-    // fetch to the embed URL and check for redirect / content.
-    // Since CORS blocks this, we use a no-cors fetch and check
-    // if the response is opaque (means page exists / loaded).
-    const res = await fetch(url, { method: "GET", mode: "no-cors", signal: AbortSignal.timeout(5000) });
-    // opaque response means the request "succeeded" (200 range)
-    // but we can't read the body. This means the embed exists.
-    // YouTube returns a specific page even for non-live channels,
-    // so we treat all reachable channels as potentially live.
-    // We'll mark all as "live" and let the iframe show naturally.
-    return res.type === "opaque";
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Because we can't do true live detection without an API key,
- * we use a practical approach:
- * 1. Attempt a no-cors fetch to the embed URL
- * 2. All channels that respond are shown in the "Live Now" grid
- * 3. Iframes that show "no live stream" will display YouTube's
- *    own "no stream available" message naturally
- *
- * To show a more meaningful demo, we mark all channels as 
- * "potentially live" and show them all in the live grid,
- * letting the iframe content reveal actual status.
- */
-async function detectLiveChannels() {
-  updateStatus("Memeriksa status live semua channel...", false);
-
-  const checks = CHANNELS.map(async (ch) => {
-    const live = await checkIfLive(ch);
-    return { ...ch, live };
-  });
-
-  const results = await Promise.all(checks);
-
-  // All that returned opaque are considered live candidates
-  liveChannels = results.filter(ch => ch.live);
-
-  // Fallback: if nothing detected (e.g. network blocked), show all
-  if (liveChannels.length === 0) {
-    liveChannels = [...CHANNELS];
-  }
-
-  return liveChannels;
-}
 
 function updateStatus(msg, done = false) {
   const statusText = statusBar.querySelector(".status-text");
@@ -138,35 +127,100 @@ function updateStatus(msg, done = false) {
 }
 
 // ============================================================
+//  FETCH CHANNELS dari /api/channels
+// ============================================================
+
+async function fetchChannels() {
+  try {
+    const res = await fetch("/api/channels");
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    if (Array.isArray(data.channels) && data.channels.length > 0) {
+      return data.channels;
+    }
+    throw new Error("Empty channels");
+  } catch (err) {
+    console.warn("Gagal fetch /api/channels, pakai DEFAULT_CHANNELS:", err);
+    return DEFAULT_CHANNELS;
+  }
+}
+
+// ============================================================
+//  LIVE DETECTION via /api/livestatus
+//  FIX: sebelumnya pakai no-cors fetch langsung ke YouTube
+//  yang selalu return opaque (semua channel dianggap live).
+//  Sekarang pakai serverless API yang scrape HTML YouTube
+//  dan deteksi isLive dengan akurat.
+// ============================================================
+
+async function detectLiveChannels() {
+  updateStatus("Memeriksa status live semua channel...", false);
+
+  try {
+    const res = await fetch("/api/livestatus");
+    if (!res.ok) throw new Error("HTTP " + res.status);
+
+    const data = await res.json();
+    const channelsData = data.channels || {};
+
+    // Map channel list dengan data live dari API
+    const enriched = CHANNELS.map(ch => ({
+      ...ch,
+      isLive:  channelsData[ch.id]?.isLive  || false,
+      videoId: channelsData[ch.id]?.videoId || null,
+      title:   channelsData[ch.id]?.title   || null,
+    }));
+
+    liveChannels = enriched.filter(ch => ch.isLive);
+
+    // Fallback kalau tidak ada yang live (bisa semua offline memang)
+    if (liveChannels.length === 0) {
+      console.info("Tidak ada yang live saat ini.");
+    }
+  } catch (err) {
+    console.warn("Gagal fetch /api/livestatus, fallback ke semua channel:", err);
+    // Fallback: tampilkan semua channel, iframe YouTube tunjukkan status aslinya
+    liveChannels = CHANNELS.map(ch => ({ ...ch, isLive: true, videoId: null }));
+  }
+
+  return liveChannels;
+}
+
+// ============================================================
 //  INIT
 // ============================================================
 
 async function init() {
   setupNavScroll();
+
+  // 1. Ambil daftar channel dari API (atau default)
+  CHANNELS = await fetchChannels();
+
+  // Render semua channel dulu (belum tahu siapa live)
   renderAllChannels();
 
-  // Start live detection
+  // 2. Cek siapa yang live via /api/livestatus
   await detectLiveChannels();
 
-  updateStatus(`${liveChannels.length} channel ditemukan`, true);
-  liveCountEl.textContent = liveChannels.length + " Channel";
+  // 3. Update UI dengan hasil live detection
+  updateStatus(`${liveChannels.length} channel live ditemukan`, true);
+  liveCountEl.textContent  = liveChannels.length + " Channel";
   liveCountNav.textContent = liveChannels.length;
-  allCountEl.textContent = CHANNELS.length + " Channel";
+  allCountEl.textContent   = CHANNELS.length + " Channel";
 
-  // Update all channel badges with live status
+  // Re-render all channels dengan badge live/offline yang akurat
   renderAllChannels();
 
   if (liveChannels.length === 0) {
     emptyLive.style.display = "";
-    liveGrid.style.display = "none";
+    liveGrid.style.display  = "none";
   } else {
     emptyLive.style.display = "none";
-    liveGrid.style.display = "";
+    liveGrid.style.display  = "";
     renderLiveGrid();
     setHero(liveChannels[0]);
   }
 
-  // Default active channels = first N live channels
   activeChannels = liveChannels.slice(0, currentLayout);
 
   setupEvents();
@@ -179,11 +233,11 @@ async function init() {
 function setHero(channel) {
   heroChannel = channel;
   heroTitle.textContent = channel.name.toUpperCase();
-  heroSub.textContent = "BFL TV — Tonton Live Sekarang";
+  heroSub.textContent   = "BFL TV — Tonton Live Sekarang";
 }
 
 // ============================================================
-//  RENDER LIVE GRID (Netflix card grid)
+//  RENDER LIVE GRID
 // ============================================================
 
 function renderLiveGrid() {
@@ -197,7 +251,7 @@ function renderLiveGrid() {
 }
 
 function createStreamCard(channel) {
-  const card = document.createElement("div");
+  const card     = document.createElement("div");
   card.className = "stream-card";
 
   const initials = channel.name.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase();
@@ -230,10 +284,10 @@ function createStreamCard(channel) {
 function renderAllChannels() {
   allChannelsEl.innerHTML = "";
   CHANNELS.forEach((ch) => {
-    const isLive = liveChannels.some(l => l.id === ch.id);
+    const isLive   = liveChannels.some(l => l.id === ch.id);
     const initials = ch.name.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase();
 
-    const badge = document.createElement("div");
+    const badge     = document.createElement("div");
     badge.className = "ch-badge" + (isLive ? " live" : "");
     badge.innerHTML = `
       <div class="ch-avatar">
@@ -255,10 +309,8 @@ function renderAllChannels() {
 // ============================================================
 
 function openPlayer(initialChannels) {
-  // If single channel, set it; otherwise use activeChannels
   if (initialChannels && initialChannels.length > 0) {
     activeChannels = [...initialChannels];
-    // Fill remaining slots with other live channels
     liveChannels.forEach(ch => {
       if (activeChannels.length >= currentLayout) return;
       if (!activeChannels.find(a => a.id === ch.id)) {
@@ -279,7 +331,6 @@ function closePlayer() {
   playerModal.classList.remove("open");
   playerOpen = false;
   document.body.style.overflow = "";
-  // Clear iframes to stop playback
   setTimeout(() => { playerGrid.innerHTML = ""; }, 400);
 }
 
@@ -288,7 +339,7 @@ function renderPlayerGrid() {
   playerGrid.innerHTML = "";
 
   for (let i = 0; i < currentLayout; i++) {
-    const ch = activeChannels[i] || null;
+    const ch   = activeChannels[i] || null;
     const card = document.createElement("div");
     card.className = "pcard" + (ch ? " loaded" : "");
 
@@ -297,14 +348,22 @@ function renderPlayerGrid() {
 
     if (ch) {
       const iframe = document.createElement("iframe");
-      iframe.src = `https://www.youtube.com/embed/live_stream?channel=${ch.id}&autoplay=1&mute=1`;
-      iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+
+      // FIX: Kalau ada videoId dari API, pakai embed video langsung
+      // (lebih stabil & pasti live). Kalau tidak ada, fallback ke live_stream.
+      if (ch.videoId) {
+        iframe.src = `https://www.youtube.com/embed/${ch.videoId}?autoplay=1&mute=1`;
+      } else {
+        iframe.src = `https://www.youtube.com/embed/live_stream?channel=${ch.id}&autoplay=1&mute=1`;
+      }
+
+      iframe.allow          = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
       iframe.allowFullscreen = true;
-      iframe.loading = "lazy";
+      iframe.loading        = "lazy";
       wrapper.appendChild(iframe);
 
-      const ov = document.createElement("div");
-      ov.className = "pcard-overlay";
+      const ov       = document.createElement("div");
+      ov.className   = "pcard-overlay";
       wrapper.appendChild(ov);
     } else {
       wrapper.innerHTML = `
@@ -315,7 +374,7 @@ function renderPlayerGrid() {
       `;
     }
 
-    const bar = document.createElement("div");
+    const bar     = document.createElement("div");
     bar.className = "pcard-bar";
 
     if (ch) {
@@ -340,11 +399,11 @@ function renderModalChannelBar() {
   modalBarInner.innerHTML = "";
 
   CHANNELS.forEach((ch) => {
-    const isActive = activeChannels.some(a => a.id === ch.id);
-    const isLive = liveChannels.some(l => l.id === ch.id);
-    const initials = ch.name.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase();
+    const isActive  = activeChannels.some(a => a.id === ch.id);
+    const isLive    = liveChannels.some(l => l.id === ch.id);
+    const initials  = ch.name.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase();
 
-    const badge = document.createElement("div");
+    const badge     = document.createElement("div");
     badge.className = "mch-badge" + (isActive ? " active" : "") + (isLive ? " live-ch" : "");
     badge.innerHTML = `
       <div class="mch-avatar">${initials}</div>
@@ -352,7 +411,7 @@ function renderModalChannelBar() {
     `;
 
     badge.addEventListener("click", () => {
-      if (!isLive) return; // only live channels
+      if (!isLive) return;
       toggleModalChannel(ch.id);
     });
 
@@ -402,7 +461,7 @@ function setLayout(count) {
   closeLayoutModal();
 }
 
-function openLayoutModal() { layoutModal.classList.add("open"); }
+function openLayoutModal()  { layoutModal.classList.add("open"); }
 function closeLayoutModal() { layoutModal.classList.remove("open"); }
 
 // ============================================================
@@ -435,7 +494,7 @@ function setupEvents() {
   });
 
   heroWatchBtn.addEventListener("click", () => {
-    if (heroChannel) openPlayer([heroChannel]);
+    if (heroChannel)          openPlayer([heroChannel]);
     else if (liveChannels.length > 0) openPlayer([liveChannels[0]]);
   });
 
@@ -463,7 +522,7 @@ function setupEvents() {
 // ============================================================
 
 function escapeHtml(str) {
-  const d = document.createElement("div");
+  const d   = document.createElement("div");
   d.textContent = str;
   return d.innerHTML;
 }
