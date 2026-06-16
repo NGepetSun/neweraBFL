@@ -1168,4 +1168,437 @@ async function fetchYTData(channelId){
         title: item.snippet?.title||'',
         handle: item.snippet?.customUrl||''
       };
-      ytCache[chann... (25 KB left)
+
+      ytCache[channelId] = result;
+      return result;
+    }
+  }catch(e){}
+  return null;
+}
+
+/* ── RENDER CHANNELS ── */
+function renderChannelCard(ch){
+  const d = channelData[ch.id]||{};
+  const av = customAvatars[ch.id]||'';
+  const thumb = av || d.thumb || '';
+  const isLive = liveSet.has(ch.id);
+  const videoId = liveVideoIds[ch.id]||'';
+
+  const avatarHTML = thumb
+    ? `<img src="${thumb}" alt="" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
+    : '';
+  const initHTML = `<span class="ch-avatar-init" style="${thumb?'display:none':''}">${initials(ch.name)}</span>`;
+
+  return `<div class="ch-card${isLive?' is-live':''}" id="card-${ch.id}" onclick="openPlayer('${ch.id}','${esc(ch.name)}')">
+    <div class="ch-card-accent"></div>
+    <div class="ch-card-body">
+      <div class="ch-avatar-row">
+        <div class="ch-avatar-wrap">
+          <div class="ch-avatar${av?' has-custom':''}">
+            ${avatarHTML}${initHTML}
+          </div>
+          <div class="ch-live-ring"></div>
+          <div class="ch-live-badge">LIVE</div>
+        </div>
+        <div class="ch-info">
+          <div class="ch-name">${esc(ch.name)}</div>
+          <div class="ch-handle">${d.handle?'@'+d.handle:''}</div>
+          <div class="ch-status-row">
+            <div class="ch-badge-live"><span class="dot"></span>LIVE</div>
+          </div>
+        </div>
+      </div>
+      <div class="ch-stats">
+        <div class="ch-stat"><div class="ch-stat-val">${fmtNum(d.subs)}</div><div class="ch-stat-lbl">Subs</div></div>
+        <div class="ch-stat"><div class="ch-stat-val">${fmtNum(d.videoCount)}</div><div class="ch-stat-lbl">Video</div></div>
+        <div class="ch-stat"><div class="ch-stat-val">${fmtNum(d.viewCount)}</div><div class="ch-stat-lbl">Views</div></div>
+      </div>
+    </div>
+    <div class="ch-actions">
+      <button class="btn-ch-watch" onclick="event.stopPropagation();openPlayer('${ch.id}','${esc(ch.name)}')">
+        ▶ ${isLive?'Tonton Live':'Kunjungi'}
+      </button>
+      <button class="btn-ch-yt" onclick="event.stopPropagation();window.open('https://youtube.com/channel/${ch.id}','_blank')" title="Buka di YouTube">
+        <svg viewBox="0 0 24 24" width="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.97C18.88 4 12 4 12 4s-6.88 0-8.59.45A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.97C5.12 20 12 20 12 20s6.88 0 8.59-.45a2.78 2.78 0 0 0 1.95-1.97A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
+      </button>
+    </div>
+  </div>`;
+}
+
+function renderAll(){
+  const q = (document.getElementById('searchInput')||{}).value||'';
+  let list = CHANNELS.filter(ch=>{
+    if(q && !ch.name.toLowerCase().includes(q.toLowerCase())) return false;
+    if(currentFilter==='live') return liveSet.has(ch.id);
+    if(currentFilter==='offline') return !liveSet.has(ch.id);
+    return true;
+  });
+
+  // Sort: live first
+  list.sort((a,b)=>{
+    const al=liveSet.has(a.id)?1:0, bl=liveSet.has(b.id)?1:0;
+    return bl-al;
+  });
+
+  const grid = document.getElementById('channelGrid');
+  if(!grid) return;
+  if(list.length===0){
+    grid.innerHTML=`<div class="empty-state"><div class="empty-icon">📺</div><div class="empty-txt">Tidak ada channel ditemukan.</div></div>`;
+  } else {
+    grid.innerHTML = list.map(renderChannelCard).join('');
+  }
+
+  // Update counts
+  const lc = liveSet.size;
+  const el = document.getElementById('navLiveCount'); if(el) el.textContent=lc;
+  const tb = document.getElementById('totalCountBadge'); if(tb) tb.textContent=CHANNELS.length+' Channel';
+  const lb = document.getElementById('liveCountBadge'); if(lb) lb.textContent=lc+' Live';
+
+  renderBar();
+}
+
+/* ── BAR (bottom) ── */
+function renderBar(){
+  const bar = document.getElementById('barScroll');
+  if(!bar) return;
+  bar.innerHTML = CHANNELS.map(ch=>{
+    const d = channelData[ch.id]||{};
+    const av = customAvatars[ch.id]||d.thumb||'';
+    const isLive = liveSet.has(ch.id);
+    return `<div class="bar-chip${isLive?' is-live':''}" onclick="openPlayer('${ch.id}','${esc(ch.name)}')">
+      <div class="bar-chip-av">
+        ${av?`<img src="${av}" alt="" onerror="this.style.display='none'">`:`<span class="init">${initials(ch.name)}</span>`}
+      </div>
+      <span class="bar-chip-name">${esc(ch.name)}</span>
+      <span class="bar-chip-dot"></span>
+    </div>`;
+  }).join('');
+}
+
+/* ── FILTER ── */
+function setFilter(f, el){
+  currentFilter=f;
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderAll();
+}
+function filterChannels(){ renderAll(); }
+
+/* ── PLAYER ── */
+function openPlayer(channelId, name){
+  const videoId = liveVideoIds[channelId]||'';
+  const src = videoId
+    ? `https://www.youtube.com/embed/${videoId}?autoplay=1`
+    : `https://www.youtube.com/embed?listType=user_uploads&list=${channelId}&autoplay=1`;
+  document.getElementById('playerIframe').src = src;
+  document.getElementById('playerChName').textContent = name;
+  document.getElementById('playerModal').classList.add('open');
+}
+function closePlayer(){
+  document.getElementById('playerModal').classList.remove('open');
+  document.getElementById('playerIframe').src='';
+}
+
+/* ── LIVE DETECT ── */
+async function checkLive(ch){
+  try{
+    const url=`https://www.youtube.com/channel/${ch.id}/live`;
+    // We can't CORS-fetch YouTube directly; use oEmbed trick
+    const oembed=`https://www.youtube.com/oembed?url=https://www.youtube.com/channel/${ch.id}/live&format=json`;
+    const res=await fetch(oembed);
+    if(res.ok){
+      const data=await res.json();
+      // If oembed succeeds for /live URL, channel is live
+      const wasLive=liveSet.has(ch.id);
+      liveSet.add(ch.id);
+      logDebug(ch.name, url, 'LIVE');
+      if(!wasLive){ renderAll(); }
+      return;
+    }
+  }catch(e){}
+  const wasLive=liveSet.has(ch.id);
+  liveSet.delete(ch.id);
+  logDebug(ch.name, '', 'offline');
+  if(wasLive){ renderAll(); }
+}
+
+async function runLiveDetect(){
+  // Check in batches to avoid rate limits
+  const batch=5;
+  for(let i=0;i<CHANNELS.length;i+=batch){
+    const slice=CHANNELS.slice(i,i+batch);
+    await Promise.all(slice.map(ch=>checkLive(ch)));
+    if(i+batch<CHANNELS.length) await new Promise(r=>setTimeout(r,1000));
+  }
+  // Re-run every 3 minutes
+  setTimeout(runLiveDetect, 3*60*1000);
+}
+
+async function loadYTDataBatch(){
+  // Fetch YT data in parallel (limited)
+  const batch=10;
+  for(let i=0;i<CHANNELS.length;i+=batch){
+    const slice=CHANNELS.slice(i,i+batch);
+    await Promise.all(slice.map(async ch=>{
+      const d=await fetchYTData(ch.id);
+      if(d){ channelData[ch.id]=d; }
+    }));
+    renderAll();
+    await new Promise(r=>setTimeout(r,500));
+  }
+}
+
+/* ── MULTIWATCH STUB ── */
+function openMultiwatch(){
+  document.getElementById('mwOverlay').style.display='flex';
+  document.getElementById('mwOverlay').style.flexDirection='column';
+  renderMwGrid();
+}
+function closeMultiwatch(){
+  document.getElementById('mwOverlay').style.display='none';
+}
+let mwLayout='3';
+let mwSlots=[];
+function setMwLayout(n){
+  mwLayout=n;
+  ['3','4','6','9'].forEach(x=>{
+    const b=document.getElementById('mwBtn'+x);
+    if(b) b.classList.toggle('active',x===n);
+  });
+  const grid=document.getElementById('mwGrid');
+  if(grid){ grid.className='mw-grid layout-'+n; }
+  renderMwGrid();
+}
+function renderMwGrid(){
+  const count=parseInt(mwLayout);
+  const grid=document.getElementById('mwGrid');
+  if(!grid) return;
+  while(mwSlots.length<count) mwSlots.push(null);
+  grid.innerHTML=Array.from({length:count},(_,i)=>{
+    const ch=mwSlots[i];
+    if(ch){
+      return `<div class="mw-slot">
+        <iframe src="https://www.youtube.com/embed?listType=user_uploads&list=${ch.id}&autoplay=1" allow="autoplay" allowfullscreen></iframe>
+        <div class="mw-slot-bar">
+          <span class="mw-slot-name">${esc(ch.name)}</span>
+          <button class="mw-slot-btn" onclick="mwSlots[${i}]=null;renderMwGrid()">✕</button>
+        </div>
+      </div>`;
+    }
+    return `<div class="mw-slot"><div class="mw-empty" onclick="openPicker(${i})">
+      <div class="mw-empty-ring">+</div>
+      <div class="mw-empty-txt">Pilih Channel</div>
+    </div></div>`;
+  }).join('');
+}
+let pickerSlot=-1;
+function openPicker(slot){
+  pickerSlot=slot;
+  document.getElementById('mwPickerOverlay').classList.add('open');
+  filterPicker();
+}
+function closePicker(){ document.getElementById('mwPickerOverlay').classList.remove('open'); }
+function filterPicker(){
+  const q=(document.getElementById('mwPickerSearch').value||'').toLowerCase();
+  const list=document.getElementById('mwPickerList');
+  list.innerHTML=CHANNELS.filter(ch=>ch.name.toLowerCase().includes(q)).map(ch=>{
+    const d=channelData[ch.id]||{};
+    const av=customAvatars[ch.id]||d.thumb||'';
+    return `<div class="mw-picker-item" onclick="pickChannel('${ch.id}','${esc(ch.name)}')">
+      <div class="mw-picker-av">${av?`<img src="${av}" alt="">`:`<span class="init">${initials(ch.name)}</span>`}</div>
+      <span class="mw-picker-ch-name">${esc(ch.name)}</span>
+    </div>`;
+  }).join('');
+}
+function pickChannel(id,name){
+  if(pickerSlot>=0){ mwSlots[pickerSlot]={id,name}; renderMwGrid(); }
+  closePicker();
+}
+
+/* ── ADMIN ── */
+function handleAdminBtn(){
+  if(isAdmin){ document.getElementById('adminPanelOverlay').classList.add('open'); renderAdminPanel(); }
+  else{ document.getElementById('adminLoginOverlay').classList.add('open'); }
+}
+function closeAdminLogin(){ document.getElementById('adminLoginOverlay').classList.remove('open'); }
+function closeAdminPanel(){ document.getElementById('adminPanelOverlay').classList.remove('open'); }
+function switchTab(name,el){
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const tc=document.getElementById('tab-'+name);
+  if(tc) tc.classList.add('active');
+  if(name==='avatars') renderAvatarTab();
+  if(name==='ticker') renderTickerTab();
+}
+function renderAdminPanel(){
+  const list=document.getElementById('adminChList');
+  const countEl=document.getElementById('adminChCount');
+  if(countEl) countEl.textContent=CHANNELS.length;
+  if(list) list.innerHTML=CHANNELS.map((ch,i)=>{
+    const d=channelData[ch.id]||{};
+    const av=customAvatars[ch.id]||d.thumb||'';
+    return `<div class="admin-ch-item">
+      <div class="admin-ch-av">${av?`<img src="${av}" alt="">`:`<span class="init">${initials(ch.name)}</span>`}</div>
+      <span class="admin-ch-name">${esc(ch.name)}</span>
+      <span class="admin-ch-handle">${ch.id}</span>
+      <button class="admin-ch-del" onclick="deleteChannel(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+function deleteChannel(i){
+  CHANNELS.splice(i,1);
+  saveChannels();
+  renderAdminPanel();
+  renderAll();
+}
+function renderAvatarTab(){
+  const list=document.getElementById('adminAvList');
+  if(!list) return;
+  list.innerHTML=CHANNELS.map(ch=>{
+    const d=channelData[ch.id]||{};
+    const av=customAvatars[ch.id]||'';
+    const thumb=av||d.thumb||'';
+    return `<div class="admin-av-item">
+      <div class="av-preview">${thumb?`<img src="${thumb}" alt="">`:`<span class="init">${initials(ch.name)}</span>`}</div>
+      <span class="av-name">${esc(ch.name)}</span>
+      <input class="av-url-input" id="av-${ch.id}" type="url" placeholder="URL foto..." value="${esc(av)}">
+      <button class="btn-av-save" onclick="saveAvatar('${ch.id}')">Simpan</button>
+    </div>`;
+  }).join('');
+}
+function saveAvatar(id){
+  const inp=document.getElementById('av-'+id);
+  if(!inp) return;
+  const url=inp.value.trim();
+  if(url) customAvatars[id]=url; else delete customAvatars[id];
+  saveCustomAvatars();
+  renderAll();
+  renderAvatarTab();
+}
+function renderTickerTab(){
+  const list=document.getElementById('tickerList');
+  const cnt=document.getElementById('tickerCount');
+  if(cnt) cnt.textContent=tickerItems.length;
+  if(!list) return;
+  list.innerHTML=tickerItems.map((t,i)=>`<div class="ticker-item-row">
+    <span class="t-text">${esc(t)}</span>
+    <button class="ticker-item-del" onclick="deleteTicker(${i})">✕</button>
+  </div>`).join('');
+}
+function deleteTicker(i){ tickerItems.splice(i,1); saveTicker(); renderTicker(); renderTickerTab(); }
+
+/* ── STARTUP ── */
+document.addEventListener('DOMContentLoaded', async function(){
+  // 1. Load data from localStorage immediately
+  loadData();
+  loadTicker();
+  loadCustomAvatars();
+
+  // 2. Render UI immediately
+  renderTicker();
+  renderAll();
+
+  // 3. Hide loading screen after animation (1.6s) + small buffer
+  setTimeout(function(){
+    const ls = document.getElementById('loadingScreen');
+    const mc = document.getElementById('mainContent');
+    if(ls) ls.classList.add('hidden');
+    if(mc) mc.style.display = 'block';
+  }, 1800);
+
+  // 4. Try loading from server API (non-blocking)
+  loadChannelsFromAPI();
+
+  // 5. Fetch YT data in background
+  loadYTDataBatch();
+
+  // 6. Start live detection
+  runLiveDetect();
+
+  // 7. Admin login submit
+  const alSubmit = document.getElementById('alSubmit');
+  if(alSubmit) alSubmit.addEventListener('click', function(){
+    const u=(document.getElementById('alUser').value||'').trim();
+    const p=(document.getElementById('alPass').value||'').trim();
+    const errEl=document.getElementById('alErr');
+    if(u===ADMIN_USER && p===ADMIN_PASS){
+      isAdmin=true;
+      sessionStorage.setItem('bfltv_admin_pass', p);
+      closeAdminLogin();
+      document.getElementById('adminPanelOverlay').classList.add('open');
+      renderAdminPanel();
+    } else {
+      if(errEl) errEl.style.display='block';
+    }
+  });
+  document.getElementById('alPass')?.addEventListener('keydown', e=>{ if(e.key==='Enter') alSubmit.click(); });
+
+  // 8. Add channel button
+  document.getElementById('addChBtn')?.addEventListener('click', async function(){
+    const nameEl=document.getElementById('addChName');
+    const handleEl=document.getElementById('addChHandle');
+    const statusEl=document.getElementById('addChStatus');
+    const name=(nameEl.value||'').trim();
+    const handle=(handleEl.value||'').trim();
+    if(!name||!handle){ if(statusEl) statusEl.textContent='Nama dan username harus diisi.'; return; }
+    if(statusEl) statusEl.textContent='Mencari channel...';
+
+    let channelId = handle;
+    // If not a channel ID (UC...), try to resolve via YouTube API by username
+    if(!handle.startsWith('UC')){
+      try{
+        const uname = handle.replace('@','');
+        const url=`https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${encodeURIComponent(uname)}&key=${YT_API_KEY}`;
+        const res=await fetch(url);
+        const data=await res.json();
+        if(data.items&&data.items[0]){ channelId=data.items[0].id; }
+        else{
+          // Try forUsername
+          const url2=`https://www.googleapis.com/youtube/v3/channels?part=id&forUsername=${encodeURIComponent(uname)}&key=${YT_API_KEY}`;
+          const res2=await fetch(url2);
+          const data2=await res2.json();
+          if(data2.items&&data2.items[0]){ channelId=data2.items[0].id; }
+          else{ if(statusEl) statusEl.textContent='Channel tidak ditemukan. Coba gunakan Channel ID (UCxxx).'; return; }
+        }
+      }catch(e){ if(statusEl) statusEl.textContent='Gagal mencari channel.'; return; }
+    }
+
+    if(CHANNELS.find(c=>c.id===channelId)){ if(statusEl) statusEl.textContent='Channel sudah ada.'; return; }
+    CHANNELS.push({id:channelId, name});
+    saveChannels();
+    renderAll();
+    renderAdminPanel();
+    nameEl.value=''; handleEl.value='';
+    if(statusEl) statusEl.textContent='✓ Channel berhasil ditambahkan!';
+    // Fetch YT data for the new channel
+    fetchYTData(channelId).then(d=>{ if(d){ channelData[channelId]=d; renderAll(); } });
+  });
+
+  // 9. Add ticker button
+  document.getElementById('addTickerBtn')?.addEventListener('click', function(){
+    const inp=document.getElementById('addTickerText');
+    const text=(inp.value||'').trim();
+    if(!text) return;
+    tickerItems.push(text);
+    saveTicker();
+    renderTicker();
+    renderTickerTab();
+    inp.value='';
+  });
+
+  // 10. Ticker speed slider
+  document.getElementById('tickerSpeed')?.addEventListener('input', function(){
+    updateTickerSpeed(this.value);
+  });
+
+  // 11. Admin logout
+  document.getElementById('adminLogoutBtn')?.addEventListener('click', function(){
+    isAdmin=false;
+    sessionStorage.removeItem('bfltv_admin_pass');
+    closeAdminPanel();
+  });
+});
+</script>
+</body>
+</html>
